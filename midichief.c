@@ -1,3 +1,5 @@
+// From http://fundamental-code.com/midi/
+
 #include <alsa/asoundlib.h>
 
 static snd_seq_t *seq_handle;
