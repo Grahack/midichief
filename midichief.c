@@ -36,7 +36,7 @@ snd_seq_event_t *midi_read(void)
     return ev;
 }
 
-void midi_process(const snd_seq_event_t *ev)
+int midi_process(const snd_seq_event_t *ev)
 {
     if((ev->type == SND_SEQ_EVENT_NOTEON)
             ||(ev->type == SND_SEQ_EVENT_NOTEOFF)) {
@@ -44,6 +44,31 @@ void midi_process(const snd_seq_event_t *ev)
         printf("[%d] Note %s: %2x vel(%2x)\n", ev->time.tick, type,
                                                ev->data.note.note,
                                                ev->data.note.velocity);
+        // https://unix.stackexchange.com/questions/759660/how-to-write-raw-midi-bytes-to-linux-midi-through-client
+        snd_seq_event_t ev2;
+        int err;
+        snd_seq_ev_clear(&ev2);
+        // direct passing mode (i.e. no queue)
+        snd_seq_ev_set_direct(&ev2);
+        // id and port number of destination
+        // could also subscribe to this port
+        // and then use snd_seq_ev_set_subs
+        // to send to subscribers
+        snd_seq_ev_set_dest(&ev2, client_id, out_port);
+        if(ev->type == SND_SEQ_EVENT_NOTEON)
+            snd_seq_ev_set_noteon(&ev2, 0, ev->data.note.note+1,  // 0 is channel
+                                           ev->data.note.velocity);
+        if(ev->type == SND_SEQ_EVENT_NOTEOFF)
+            snd_seq_ev_set_noteoff(&ev2, 0, ev->data.note.note+1, // 0 is channel
+                                            ev->data.note.velocity);
+        snd_seq_ev_set_subs(&ev2);
+        snd_seq_ev_set_source(&ev2, out_port);
+        if ((err = snd_seq_event_output_direct(seq_handle, &ev2)) < 0) {
+            printf("send to sequencer failed \n");
+            return -1;
+        }
+        // call when nothing further to send:
+        snd_seq_drain_output(seq_handle)+1;
     }
     else if(ev->type == SND_SEQ_EVENT_CONTROLLER)
         printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
@@ -51,13 +76,14 @@ void midi_process(const snd_seq_event_t *ev)
                                                 ev->data.control.value);
     else
         printf("[%d] Unknown:  Unhandled Event Received\n", ev->time.tick);
+    return 0;
 }
 
 int main()
 {
     midi_open();
     while(1)
-        midi_process(midi_read());
+        if(midi_process(midi_read()) < 0) printf("Error in midi_process!");
     return -1;
 }
 
