@@ -25,8 +25,8 @@ void midi_open(void)
                 SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
                 SND_SEQ_PORT_TYPE_APPLICATION),
             "Could not open out port");
-    printf("Starting with id=%d, in_port=%d, out_port=%d\n",
-            client_id, in_port, out_port);
+    printf("MIDI Chief ALSA client started with\n");
+    printf("  id=%d, in_port=%d, out_port=%d\n", client_id, in_port, out_port);
 }
 
 snd_seq_event_t *midi_read(void)
