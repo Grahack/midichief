@@ -13,7 +13,7 @@ void midi_open(void)
     CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0),
             "Could not open sequencer");
 
-    CHK(snd_seq_set_client_name(seq_handle, "Midi Chief ALSA client"),
+    CHK(snd_seq_set_client_name(seq_handle, "MIDI Chief ALSA client"),
             "Could not set client name");
     CHK(client_id = snd_seq_client_id(seq_handle),
             "Could not set client id");
