@@ -49,9 +49,11 @@ int midi_process(const snd_seq_event_t *ev)
     if((ev->type == SND_SEQ_EVENT_NOTEON)
             ||(ev->type == SND_SEQ_EVENT_NOTEOFF)) {
         const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
-        printf("[%d] Note %s: %2x vel(%2x)\n", ev->time.tick, type,
-                                               ev->data.note.note,
-                                               ev->data.note.velocity);
+        printf("Ch:%2d Note %s: %2x vel(%2x)\n",
+                ev->data.note.channel,
+                type,
+                ev->data.note.note,
+                ev->data.note.velocity);
         // With some help from
         // https://unix.stackexchange.com/questions/759660/how-to-write-raw-midi-bytes-to-linux-midi-through-client
         // and http://cowlark.com/amidimap/
@@ -85,17 +87,20 @@ int midi_process(const snd_seq_event_t *ev)
         snd_seq_drain_output(seq_handle);
     }
     else if(ev->type == SND_SEQ_EVENT_CONTROLLER)
-        printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
-                                                ev->data.control.param,
-                                                ev->data.control.value);
+        printf("Ch:%2d Control: %2x val(%2x)\n",
+                ev->data.control.channel,
+                ev->data.control.param,
+                ev->data.control.value);
     else if(ev->type == SND_SEQ_EVENT_PGMCHANGE)
-        printf("[%d] PGM change:  %2x val(%2x)\n", ev->time.tick,
-                                                   ev->data.control.param,
-                                                   ev->data.control.value);
+        printf("Ch:%2d PGM ch.: %2x val(%2x)\n",
+                ev->data.control.channel,
+                ev->data.control.param,
+                ev->data.control.value);
     else if(ev->type == SND_SEQ_EVENT_KEYPRESS)
-        printf("[%d] Aftertouch:  %2x val(%2x)\n", ev->time.tick,
-                                                   ev->data.note.note,
-                                                   ev->data.note.velocity);
+        printf("Ch:%2d Aftert.: %2x val(%2x)\n",
+                    ev->data.note.channel,
+                    ev->data.note.note,
+                    ev->data.note.velocity);
     else
         printf("Unknown:  Unhandled Event Received: %2x\n", ev->type);
     return 0;
