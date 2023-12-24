@@ -79,12 +79,11 @@ int note_off(int channel, int note, int velocity) {
 
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
+        int chan = ev->data.note.channel;
+        int note = ev->data.note.note;
+        int velo = ev->data.note.velocity;
         const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
-        printf("Ch:%2d Note %s: %2x vel(%2x)\n",
-                ev->data.note.channel,
-                type,
-                ev->data.note.note,
-                ev->data.note.velocity);
+        printf("Ch:%2d Note %s: %2x vel(%2x)\n", chan, type, note, velo);
         if(ev->type == SND_SEQ_EVENT_NOTEON)
             return note_on(ev->data.note.channel,
                            ev->data.note.note,
