@@ -44,6 +44,41 @@ snd_seq_event_t *midi_read(void)
     return ev;
 }
 
+// Event sending with some help from
+// https://unix.stackexchange.com/questions/759660/how-to-write-raw-midi-bytes-to-linux-midi-through-client
+// and http://cowlark.com/amidimap/
+snd_seq_event_t new_event() {
+    snd_seq_event_t ev;
+    snd_seq_ev_clear(&ev);
+    snd_seq_ev_set_direct(&ev);
+    snd_seq_ev_set_dest(&ev, client_id, out_port);
+    return ev;
+}
+
+int send_event(snd_seq_event_t ev) {
+    int err;
+    snd_seq_ev_set_subs(&ev);
+    snd_seq_ev_set_source(&ev, out_port);
+    if ((err = snd_seq_event_output_direct(seq_handle, &ev)) < 0) {
+        puts("send to sequencer failed");
+        return -1;
+    }
+    snd_seq_drain_output(seq_handle);
+    return 0;
+}
+
+int note_on(int channel, int note, int velocity) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_noteon(&ev, channel, note, velocity);
+    return send_event(ev);
+}
+
+int note_off(int channel, int note, int velocity) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_noteoff(&ev, channel, note, velocity);
+    return send_event(ev);
+}
+
 int midi_process(const snd_seq_event_t *ev)
 {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
@@ -53,37 +88,14 @@ int midi_process(const snd_seq_event_t *ev)
                 type,
                 ev->data.note.note,
                 ev->data.note.velocity);
-        // With some help from
-        // https://unix.stackexchange.com/questions/759660/how-to-write-raw-midi-bytes-to-linux-midi-through-client
-        // and http://cowlark.com/amidimap/
-        snd_seq_event_t ev2;
-        int err;
-        snd_seq_ev_clear(&ev2);
-        // direct passing mode (i.e. no queue)
-        snd_seq_ev_set_direct(&ev2);
-        // id and port number of destination
-        // could also subscribe to this port
-        // and then use snd_seq_ev_set_subs
-        // to send to subscribers
-        snd_seq_ev_set_dest(&ev2, client_id, out_port);
         if(ev->type == SND_SEQ_EVENT_NOTEON)
-            snd_seq_ev_set_noteon(&ev2,
-                    ev->data.note.channel,
-                    ev->data.note.note,
-                    ev->data.note.velocity);
+            return note_on(ev->data.note.channel,
+                           ev->data.note.note,
+                           ev->data.note.velocity);
         if(ev->type == SND_SEQ_EVENT_NOTEOFF)
-            snd_seq_ev_set_noteoff(&ev2,
-                    ev->data.note.channel,
-                    ev->data.note.note,
-                    ev->data.note.velocity);
-        snd_seq_ev_set_subs(&ev2);
-        snd_seq_ev_set_source(&ev2, out_port);
-        if ((err = snd_seq_event_output_direct(seq_handle, &ev2)) < 0) {
-            puts("send to sequencer failed");
-            return -1;
-        }
-        // call when nothing further to send:
-        snd_seq_drain_output(seq_handle);
+            return note_off(ev->data.note.channel,
+                            ev->data.note.note,
+                            ev->data.note.velocity);
     }
     else if(ev->type == SND_SEQ_EVENT_PITCHBEND)
         printf("Ch:%2d PitchB.: %5d\n",
