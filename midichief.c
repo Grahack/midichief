@@ -28,7 +28,7 @@ void midi_open(void)
                 SND_SEQ_PORT_CAP_READ|SND_SEQ_PORT_CAP_SUBS_READ,
                 SND_SEQ_PORT_TYPE_APPLICATION),
             "Could not open out port");
-    printf("MIDI Chief ALSA client started with\n");
+    puts("MIDI Chief ALSA client started with");
     printf("  id=%d, in_port=%d, out_port=%d\n", client_id, in_port, out_port);
 }
 
@@ -71,7 +71,7 @@ int midi_process(const snd_seq_event_t *ev)
         snd_seq_ev_set_subs(&ev2);
         snd_seq_ev_set_source(&ev2, out_port);
         if ((err = snd_seq_event_output_direct(seq_handle, &ev2)) < 0) {
-            printf("send to sequencer failed \n");
+            puts("send to sequencer failed");
             return -1;
         }
         // call when nothing further to send:
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     lua_State *L = luaL_newstate();
     // Check command line args
     if (argc == 1) {
-        printf("No Lua file provided, raw-forwarding everything.\n");
+        puts("No Lua file provided, raw-forwarding everything.");
     } else {
         // Read Lua file: check if it exists first
         char *filename = argv[1];
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     // Commect to ALSA and process events
     midi_open();
     while(1)
-        if(midi_process(midi_read()) < 0) printf("Error in midi_process!");
+        if(midi_process(midi_read()) < 0) puts("Error in midi_process!");
     return -1;
 }
 
