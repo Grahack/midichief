@@ -104,6 +104,8 @@ int midi_process(const snd_seq_event_t *ev)
                     ev->data.note.channel,
                     ev->data.note.note,
                     ev->data.note.velocity);
+    else if(ev->type == SND_SEQ_EVENT_SYSEX)
+        puts("Ignored: SYSEX event");
     else
         printf("Unknown:  Unhandled Event Received: %2x\n", ev->type);
     return 0;
