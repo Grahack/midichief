@@ -82,7 +82,7 @@ int midi_process(const snd_seq_event_t *ev)
             return -1;
         }
         // call when nothing further to send:
-        snd_seq_drain_output(seq_handle)+1;
+        snd_seq_drain_output(seq_handle);
     }
     else if(ev->type == SND_SEQ_EVENT_CONTROLLER)
         printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
