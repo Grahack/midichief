@@ -143,13 +143,25 @@ int main(int argc, char *argv[]) {
             }
             // Check if the relevant functions are defined
             lua_getglobal(L, "on_note_on");
-            if (lua_isfunction(L, -1)) on_note_on_defined = 1;
+            if (lua_isfunction(L, -1)) {
+                on_note_on_defined = 1;
+                lua_pop(L, lua_gettop(L));
+            }
             lua_getglobal(L, "on_note_off");
-            if (lua_isfunction(L, -1)) on_note_off_defined = 1;
+            if (lua_isfunction(L, -1)) {
+                on_note_off_defined = 1;
+                lua_pop(L, lua_gettop(L));
+            }
             lua_getglobal(L, "on_cc");
-            if (lua_isfunction(L, -1)) on_cc_defined = 1;
+            if (lua_isfunction(L, -1)) {
+                on_cc_defined = 1;
+                lua_pop(L, lua_gettop(L));
+            }
             lua_getglobal(L, "on_pc");
-            if (lua_isfunction(L, -1)) on_pc_defined = 1;
+            if (lua_isfunction(L, -1)) {
+                on_pc_defined = 1;
+                lua_pop(L, lua_gettop(L));
+            }
             puts("Are defined:");
             printf("  on_note_on:%d, on_note_off:%d, on_cc:%d, on_pc:%d\n",
                 on_note_on_defined, on_note_off_defined,
