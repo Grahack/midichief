@@ -16,8 +16,7 @@ static int on_cc_defined = 0;
 static int on_pc_defined = 0;
 
 #define CHK(stmt, msg) if((stmt) < 0) {puts("ERROR: "#msg); exit(1);}
-void midi_open(void)
-{
+void midi_open(void) {
     CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0),
             "Could not open sequencer");
 
@@ -37,8 +36,7 @@ void midi_open(void)
     printf("  id=%d, in_port=%d, out_port=%d\n", client_id, in_port, out_port);
 }
 
-snd_seq_event_t *midi_read(void)
-{
+snd_seq_event_t *midi_read(void) {
     snd_seq_event_t *ev = NULL;
     snd_seq_event_input(seq_handle, &ev);
     return ev;
@@ -79,8 +77,7 @@ int note_off(int channel, int note, int velocity) {
     return send_event(ev);
 }
 
-int midi_process(const snd_seq_event_t *ev)
-{
+int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
         printf("Ch:%2d Note %s: %2x vel(%2x)\n",
@@ -122,8 +119,7 @@ int midi_process(const snd_seq_event_t *ev)
     return 0;
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     lua_State *L = luaL_newstate();
     // Check command line args
     if (argc == 1) {
