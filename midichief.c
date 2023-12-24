@@ -66,13 +66,15 @@ int midi_process(const snd_seq_event_t *ev)
         // to send to subscribers
         snd_seq_ev_set_dest(&ev2, client_id, out_port);
         if(ev->type == SND_SEQ_EVENT_NOTEON)
-            // 0 is the channel
-            snd_seq_ev_set_noteon(&ev2, 0, ev->data.note.note,
-                                           ev->data.note.velocity);
+            snd_seq_ev_set_noteon(&ev2,
+                    ev->data.note.channel,
+                    ev->data.note.note,
+                    ev->data.note.velocity);
         if(ev->type == SND_SEQ_EVENT_NOTEOFF)
-            // 0 is the channel
-            snd_seq_ev_set_noteoff(&ev2, 0, ev->data.note.note,
-                                            ev->data.note.velocity);
+            snd_seq_ev_set_noteoff(&ev2,
+                    ev->data.note.channel,
+                    ev->data.note.note,
+                    ev->data.note.velocity);
         snd_seq_ev_set_subs(&ev2);
         snd_seq_ev_set_source(&ev2, out_port);
         if ((err = snd_seq_event_output_direct(seq_handle, &ev2)) < 0) {
