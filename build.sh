@@ -1,1 +1,1 @@
-gcc midichief.c -lasound -o midichief
+gcc midichief.c -o midichief -lasound -llua5.3 -I/usr/include/lua5.3/

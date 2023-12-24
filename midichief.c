@@ -1,6 +1,9 @@
 // From http://fundamental-code.com/midi/
 
 #include <alsa/asoundlib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 static snd_seq_t *seq_handle;
 static int client_id;
@@ -91,8 +94,31 @@ int midi_process(const snd_seq_event_t *ev)
     return 0;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    lua_State *L = luaL_newstate();
+    // Check command line args
+    if (argc == 1) {
+        printf("No Lua file provided, raw-forwarding everything.\n");
+    } else {
+        // Read Lua file: check if it exists first
+        char *filename = argv[1];
+        FILE *file;
+        if((file = fopen(filename, "r"))!=NULL) {
+            // File exists, we close it then read it with the Lua tools
+            fclose(file);
+            printf("Reading MIDI logic from '%s'.\n", filename);
+            luaL_openlibs(L);
+            if (luaL_dofile(L, filename) == LUA_OK) {
+                lua_pop(L, lua_gettop(L));
+            }
+            lua_close(L);
+        } else {
+            printf("File '%s' does not exist, raw-forwarding everything.\n",
+                    filename);
+        }
+    }
+    // Commect to ALSA and process events
     midi_open();
     while(1)
         if(midi_process(midi_read()) < 0) printf("Error in midi_process!");
