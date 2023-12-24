@@ -44,7 +44,9 @@ int midi_process(const snd_seq_event_t *ev)
         printf("[%d] Note %s: %2x vel(%2x)\n", ev->time.tick, type,
                                                ev->data.note.note,
                                                ev->data.note.velocity);
+        // With some help from
         // https://unix.stackexchange.com/questions/759660/how-to-write-raw-midi-bytes-to-linux-midi-through-client
+        // and http://cowlark.com/amidimap/
         snd_seq_event_t ev2;
         int err;
         snd_seq_ev_clear(&ev2);
