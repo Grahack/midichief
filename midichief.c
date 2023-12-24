@@ -116,6 +116,10 @@ int main(int argc, char *argv[])
             luaL_openlibs(L);
             if (luaL_dofile(L, filename) == LUA_OK) {
                 lua_pop(L, lua_gettop(L));
+            } else {
+                puts("Error in Lua file:");
+                puts(lua_tostring(L, lua_gettop(L)));
+                lua_pop(L, lua_gettop(L));
             }
             // Check if the relevant functions are defined
             lua_getglobal(L, "on_note_on");
