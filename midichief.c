@@ -107,7 +107,7 @@ int midi_process(const snd_seq_event_t *ev)
     else if(ev->type == SND_SEQ_EVENT_SYSEX)
         puts("Ignored: SYSEX event");
     else
-        printf("Unknown:  Unhandled Event Received: %2x\n", ev->type);
+        printf("Unhandled Event Received: %2x (hex)\n", ev->type);
     return 0;
 }
 
