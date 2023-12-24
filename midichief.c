@@ -15,6 +15,8 @@ static int on_note_off_defined = 0;
 static int on_cc_defined = 0;
 static int on_pc_defined = 0;
 
+static lua_State *L;
+
 #define CHK(stmt, msg) if((stmt) < 0) {puts("ERROR: "#msg); exit(1);}
 void midi_open(void) {
     CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0),
@@ -119,7 +121,7 @@ int midi_process(const snd_seq_event_t *ev) {
 }
 
 int main(int argc, char *argv[]) {
-    lua_State *L = luaL_newstate();
+    L = luaL_newstate();
     // Check command line args
     if (argc == 1) {
         puts("No Lua file provided, raw-forwarding everything.");
