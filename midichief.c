@@ -96,9 +96,8 @@ int midi_process(const snd_seq_event_t *ev)
                 ev->data.control.param,
                 ev->data.control.value);
     else if(ev->type == SND_SEQ_EVENT_PGMCHANGE)
-        printf("Ch:%2d PGM ch.: %2x val(%2x)\n",
+        printf("Ch:%2d PGM ch.: %2x\n",
                 ev->data.control.channel,
-                ev->data.control.param,
                 ev->data.control.value);
     else if(ev->type == SND_SEQ_EVENT_KEYPRESS)
         printf("Ch:%2d Aftert.: %2x val(%2x)\n",
