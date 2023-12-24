@@ -10,6 +10,11 @@ static int client_id;
 static int in_port;
 static int out_port;
 
+static int on_note_on_defined = 0;
+static int on_note_off_defined = 0;
+static int on_cc_defined = 0;
+static int on_pc_defined = 0;
+
 #define CHK(stmt, msg) if((stmt) < 0) {puts("ERROR: "#msg); exit(1);}
 void midi_open(void)
 {
@@ -112,6 +117,20 @@ int main(int argc, char *argv[])
             if (luaL_dofile(L, filename) == LUA_OK) {
                 lua_pop(L, lua_gettop(L));
             }
+            // Check if the relevant functions are defined
+            lua_getglobal(L, "on_note_on");
+            if (lua_isfunction(L, -1)) on_note_on_defined = 1;
+            lua_getglobal(L, "on_note_off");
+            if (lua_isfunction(L, -1)) on_note_off_defined = 1;
+            lua_getglobal(L, "on_cc");
+            if (lua_isfunction(L, -1)) on_cc_defined = 1;
+            lua_getglobal(L, "on_pc");
+            if (lua_isfunction(L, -1)) on_pc_defined = 1;
+            puts("Are defined:");
+            printf("  on_note_on:%d, on_note_off:%d, on_cc:%d, on_pc:%d\n",
+                on_note_on_defined, on_note_off_defined,
+                on_cc_defined, on_pc_defined);
+            // Thank you Lua!!!
             lua_close(L);
         } else {
             printf("File '%s' does not exist, raw-forwarding everything.\n",
