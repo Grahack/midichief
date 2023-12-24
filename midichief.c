@@ -78,8 +78,16 @@ int midi_process(const snd_seq_event_t *ev)
         printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
                                                 ev->data.control.param,
                                                 ev->data.control.value);
+    else if(ev->type == SND_SEQ_EVENT_PGMCHANGE)
+        printf("[%d] PGM change:  %2x val(%2x)\n", ev->time.tick,
+                                                   ev->data.control.param,
+                                                   ev->data.control.value);
+    else if(ev->type == SND_SEQ_EVENT_KEYPRESS)
+        printf("[%d] Aftertouch:  %2x val(%2x)\n", ev->time.tick,
+                                                   ev->data.note.note,
+                                                   ev->data.note.velocity);
     else
-        printf("[%d] Unknown:  Unhandled Event Received\n", ev->time.tick);
+        printf("Unknown:  Unhandled Event Received: %2x\n", ev->type);
     return 0;
 }
 
