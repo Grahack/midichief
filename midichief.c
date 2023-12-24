@@ -86,6 +86,10 @@ int midi_process(const snd_seq_event_t *ev)
         // call when nothing further to send:
         snd_seq_drain_output(seq_handle);
     }
+    else if(ev->type == SND_SEQ_EVENT_PITCHBEND)
+        printf("Ch:%2d PitchB.: %5d\n",
+                    ev->data.control.channel,
+                    ev->data.control.value);
     else if(ev->type == SND_SEQ_EVENT_CONTROLLER)
         printf("Ch:%2d Control: %2x val(%2x)\n",
                 ev->data.control.channel,
