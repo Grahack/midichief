@@ -46,8 +46,7 @@ snd_seq_event_t *midi_read(void)
 
 int midi_process(const snd_seq_event_t *ev)
 {
-    if((ev->type == SND_SEQ_EVENT_NOTEON)
-            ||(ev->type == SND_SEQ_EVENT_NOTEOFF)) {
+    if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
         printf("Ch:%2d Note %s: %2x vel(%2x)\n",
                 ev->data.note.channel,
