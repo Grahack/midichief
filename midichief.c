@@ -130,6 +130,21 @@ int note_off_for_lua(lua_State *L) {
     return 0; // The number of returned values
 }
 
+int cc_for_lua(lua_State *L) {
+    int chan  = luaL_checkinteger(L, 1);
+    int param = luaL_checkinteger(L, 2);
+    int value = luaL_checkinteger(L, 3);
+    cc(chan, param, value);
+    return 0; // The number of returned values
+}
+
+int pc_for_lua(lua_State *L) {
+    int chan  = luaL_checkinteger(L, 1);
+    int value = luaL_checkinteger(L, 2);
+    pc(chan, value);
+    return 0; // The number of returned values
+}
+
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         int chan = ev->data.note.channel;
@@ -227,6 +242,10 @@ int main(int argc, char *argv[]) {
         lua_setglobal(L, "note_on");
         lua_pushcfunction(L, note_off_for_lua);
         lua_setglobal(L, "note_off");
+        lua_pushcfunction(L, cc_for_lua);
+        lua_setglobal(L, "cc");
+        lua_pushcfunction(L, pc_for_lua);
+        lua_setglobal(L, "pc");
     }
     // Commect to ALSA and process events
     midi_open();
