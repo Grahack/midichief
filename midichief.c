@@ -90,6 +90,22 @@ void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
     if (lua_pcall(L, 3, 1, 0) == LUA_OK) lua_pop(L, lua_gettop(L));
 }
 
+int note_on_for_lua(lua_State *L) {
+    int chan = luaL_checkinteger(L, 1);
+    int note = luaL_checkinteger(L, 2);
+    int velo = luaL_checkinteger(L, 3);
+    note_on(chan, note, velo);
+    return 0; // The number of returned values
+}
+
+int note_off_for_lua(lua_State *L) {
+    int chan = luaL_checkinteger(L, 1);
+    int note = luaL_checkinteger(L, 2);
+    int velo = luaL_checkinteger(L, 3);
+    note_off(chan, note, velo);
+    return 0; // The number of returned values
+}
+
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         int chan = ev->data.note.channel;
@@ -183,6 +199,10 @@ int main(int argc, char *argv[]) {
             printf("File '%s' does not exist, raw-forwarding everything.\n",
                     filename);
         }
+        lua_pushcfunction(L, note_on_for_lua);
+        lua_setglobal(L, "note_on");
+        lua_pushcfunction(L, note_off_for_lua);
+        lua_setglobal(L, "note_off");
     }
     // Commect to ALSA and process events
     midi_open();
