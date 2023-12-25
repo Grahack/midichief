@@ -210,26 +210,41 @@ int midi_process(const snd_seq_event_t *ev) {
                 return note_off(chan, note, velo);
             }
         }
-    }
-    else if(ev->type == SND_SEQ_EVENT_PITCHBEND)
-        printf("Ch:%2d PitchB.: %5d\n",
-                    ev->data.control.channel,
-                    ev->data.control.value);
-    else if(ev->type == SND_SEQ_EVENT_CONTROLLER)
-        printf("Ch:%2d Control: %2x val(%2x)\n",
-                ev->data.control.channel,
-                ev->data.control.param,
-                ev->data.control.value);
-    else if(ev->type == SND_SEQ_EVENT_PGMCHANGE)
-        printf("Ch:%2d PGM ch.: %2x\n",
-                ev->data.control.channel,
-                ev->data.control.value);
-    else if(ev->type == SND_SEQ_EVENT_KEYPRESS)
-        printf("Ch:%2d Aftert.: %2x val(%2x)\n",
-                    ev->data.note.channel,
-                    ev->data.note.note,
-                    ev->data.note.velocity);
-    else if(ev->type == SND_SEQ_EVENT_SYSEX)
+    } else if(ev->type == SND_SEQ_EVENT_PITCHBEND) {
+        int chan = ev->data.control.channel;
+        int val = ev->data.control.value;
+        printf("Ch:%2d PitchB.: %5d\n", chan, val);
+        // Direct forward, no logic
+        pb(chan, val);
+    } else if(ev->type == SND_SEQ_EVENT_KEYPRESS) {
+        int chan = ev->data.note.channel;
+        int note = ev->data.note.note;
+        int velo = ev->data.note.velocity;
+        printf("Ch:%2d Aftert.: %2x val(%2x)\n", chan, note, velo);
+        // Direct forward, no logic
+        keypress(chan, note, velo);
+    } else if(ev->type == SND_SEQ_EVENT_CONTROLLER) {
+        int chan  = ev->data.control.channel;
+        int param = ev->data.control.param;
+        int val   = ev->data.control.value;
+        printf("Ch:%2d Control: %2x val(%2x)\n", chan, param, val);
+        if(on_cc_defined) {
+            call_lua_fn("on_cc", chan, param, val);
+            return 0;
+        } else {
+            return cc(chan, param, val);
+        }
+    } else if(ev->type == SND_SEQ_EVENT_PGMCHANGE) {
+        int chan = ev->data.control.channel;
+        int val  = ev->data.control.value;
+        printf("Ch:%2d PGM ch.: %2x\n", chan, val);
+        if(on_pc_defined) {
+            call_lua_fn("on_pc", chan, val, 0);
+            return 0;
+        } else {
+            return pc(chan, val);
+        }
+    } else if(ev->type == SND_SEQ_EVENT_SYSEX)
         puts("Ignored: SYSEX event");
     else
         printf("Unhandled Event Received: %2x (hex)\n", ev->type);
