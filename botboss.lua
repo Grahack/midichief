@@ -37,3 +37,11 @@ function on_cc(chan, param, val)
     end
     cc(chan, param, val)
 end
+
+function on_pc(chan, val)
+    if val == 127 then
+        reload_rules()
+    else
+        pc(chan, val)
+    end
+end
