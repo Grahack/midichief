@@ -188,6 +188,11 @@ int load_lua_rules() {
     }
 }
 
+int reload_for_lua(lua_State *L) {
+    load_lua_rules();
+    return 0; // The number of returned values
+}
+
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         int chan = ev->data.note.channel;
@@ -259,6 +264,8 @@ int main(int argc, char *argv[]) {
     } else {
         filename = argv[1];
         load_lua_rules();
+        lua_pushcfunction(L, reload_for_lua);
+        lua_setglobal(L, "reload_rules");
         lua_pushcfunction(L, note_on_for_lua);
         lua_setglobal(L, "note_on");
         lua_pushcfunction(L, note_off_for_lua);
