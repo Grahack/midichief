@@ -30,8 +30,10 @@ end
 
 function on_cc(chan, param, val)
     if chan==0 then
-        cc(chan, CC_map[param], val);
-    else
-        cc(chan, param, val);
+        local new_param = CC_map[param]
+        if new_param ~= nil then
+            param = new_param
+        end
     end
+    cc(chan, param, val)
 end
