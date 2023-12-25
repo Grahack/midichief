@@ -167,7 +167,8 @@ int main(int argc, char *argv[]) {
                 on_note_on_defined, on_note_off_defined,
                 on_cc_defined, on_pc_defined);
             // Thank you Lua!!!
-            lua_close(L);
+            // We do note close the Lua state L for subsequent use
+            // lua_close()
         } else {
             printf("File '%s' does not exist, raw-forwarding everything.\n",
                     filename);
