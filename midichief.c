@@ -80,6 +80,30 @@ int note_off(int channel, int note, int velocity) {
     return send_event(ev);
 }
 
+int pb(int channel, int value) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_pitchbend(&ev, channel, value);
+    return send_event(ev);
+}
+
+int keypress(int channel, int note, int velocity) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_keypress(&ev, channel, note, velocity);
+    return send_event(ev);
+}
+
+int cc(int channel, int param, int value) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_controller(&ev, channel, param, value);
+    return send_event(ev);
+}
+
+int pc(int channel, int value) {
+    snd_seq_event_t ev = new_event();
+    snd_seq_ev_set_pgmchange(&ev, channel, value);
+    return send_event(ev);
+}
+
 // All Lua MIDI functions take 2 or 3 integers so we assume 3
 void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
     lua_getglobal(L, fn_name);
