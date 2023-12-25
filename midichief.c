@@ -10,6 +10,8 @@ static int client_id;
 static int in_port;
 static int out_port;
 
+static char *filename;
+
 static int on_note_on_defined = 0;
 static int on_note_off_defined = 0;
 static int on_cc_defined = 0;
@@ -145,6 +147,47 @@ int pc_for_lua(lua_State *L) {
     return 0; // The number of returned values
 }
 
+int load_lua_rules() {
+    // Read Lua file: check if it exists first
+    FILE *file;
+    if((file = fopen(filename, "r"))!=NULL) {
+        // File exists, we close it then read it with the Lua tools
+        fclose(file);
+        printf("Reading MIDI logic from '%s'.\n", filename);
+        luaL_openlibs(L);
+        if (luaL_dofile(L, filename) == LUA_OK) {
+            lua_pop(L, lua_gettop(L));
+        } else {
+            puts("Error in Lua file:");
+            puts(lua_tostring(L, lua_gettop(L)));
+            lua_pop(L, lua_gettop(L));
+        }
+        // Check if the relevant functions are defined
+        lua_getglobal(L, "on_note_on");
+        if (lua_isfunction(L, -1)) on_note_on_defined = 1;
+        lua_pop(L, lua_gettop(L));
+        lua_getglobal(L, "on_note_off");
+        if (lua_isfunction(L, -1)) on_note_off_defined = 1;
+        lua_pop(L, lua_gettop(L));
+        lua_getglobal(L, "on_cc");
+        if (lua_isfunction(L, -1)) on_cc_defined = 1;
+        lua_pop(L, lua_gettop(L));
+        lua_getglobal(L, "on_pc");
+        if (lua_isfunction(L, -1)) on_pc_defined = 1;
+        lua_pop(L, lua_gettop(L));
+        printf("In %s are defined:\n", filename);
+        printf("  on_note_on:%d, on_note_off:%d, on_cc:%d, on_pc:%d\n",
+            on_note_on_defined, on_note_off_defined,
+            on_cc_defined, on_pc_defined);
+        // Thank you Lua!!!
+        // We do note close the Lua state L for subsequent use
+        // lua_close()
+    } else {
+        printf("File '%s' does not exist, raw-forwarding everything.\n",
+                filename);
+    }
+}
+
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         int chan = ev->data.note.channel;
@@ -199,45 +242,8 @@ int main(int argc, char *argv[]) {
     if (argc == 1) {
         puts("No Lua file provided, raw-forwarding everything.");
     } else {
-        // Read Lua file: check if it exists first
-        char *filename = argv[1];
-        FILE *file;
-        if((file = fopen(filename, "r"))!=NULL) {
-            // File exists, we close it then read it with the Lua tools
-            fclose(file);
-            printf("Reading MIDI logic from '%s'.\n", filename);
-            luaL_openlibs(L);
-            if (luaL_dofile(L, filename) == LUA_OK) {
-                lua_pop(L, lua_gettop(L));
-            } else {
-                puts("Error in Lua file:");
-                puts(lua_tostring(L, lua_gettop(L)));
-                lua_pop(L, lua_gettop(L));
-            }
-            // Check if the relevant functions are defined
-            lua_getglobal(L, "on_note_on");
-            if (lua_isfunction(L, -1)) on_note_on_defined = 1;
-            lua_pop(L, lua_gettop(L));
-            lua_getglobal(L, "on_note_off");
-            if (lua_isfunction(L, -1)) on_note_off_defined = 1;
-            lua_pop(L, lua_gettop(L));
-            lua_getglobal(L, "on_cc");
-            if (lua_isfunction(L, -1)) on_cc_defined = 1;
-            lua_pop(L, lua_gettop(L));
-            lua_getglobal(L, "on_pc");
-            if (lua_isfunction(L, -1)) on_pc_defined = 1;
-            lua_pop(L, lua_gettop(L));
-            printf("In %s are defined:\n", filename);
-            printf("  on_note_on:%d, on_note_off:%d, on_cc:%d, on_pc:%d\n",
-                on_note_on_defined, on_note_off_defined,
-                on_cc_defined, on_pc_defined);
-            // Thank you Lua!!!
-            // We do note close the Lua state L for subsequent use
-            // lua_close()
-        } else {
-            printf("File '%s' does not exist, raw-forwarding everything.\n",
-                    filename);
-        }
+        filename = argv[1];
+        load_lua_rules();
         lua_pushcfunction(L, note_on_for_lua);
         lua_setglobal(L, "note_on");
         lua_pushcfunction(L, note_off_for_lua);
