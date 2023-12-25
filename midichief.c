@@ -79,6 +79,16 @@ int note_off(int channel, int note, int velocity) {
     return send_event(ev);
 }
 
+// All Lua MIDI functions take 2 or 3 integers so we assume 3
+void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
+    lua_getglobal(L, fn_name);
+    if (lua_isfunction(L, -1)) printf("Call Lua fn: %s\n", fn_name);
+    lua_pushinteger(L, arg1);
+    lua_pushinteger(L, arg2);
+    lua_pushinteger(L, arg3);
+    if (lua_pcall(L, 3, 1, 0) == LUA_OK) lua_pop(L, lua_gettop(L));
+}
+
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
         int chan = ev->data.note.channel;
@@ -86,14 +96,21 @@ int midi_process(const snd_seq_event_t *ev) {
         int velo = ev->data.note.velocity;
         const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
         printf("Ch:%2d Note %s: %2x vel(%2x)\n", chan, type, note, velo);
-        if(ev->type == SND_SEQ_EVENT_NOTEON)
-            return note_on(ev->data.note.channel,
-                           ev->data.note.note,
-                           ev->data.note.velocity);
-        if(ev->type == SND_SEQ_EVENT_NOTEOFF)
-            return note_off(ev->data.note.channel,
-                            ev->data.note.note,
-                            ev->data.note.velocity);
+        if(ev->type == SND_SEQ_EVENT_NOTEON) {
+            if(on_note_on_defined) {
+                call_lua_fn("on_note_on", chan, note, velo);
+                return 0;
+            } else {
+                return note_on(chan, note, velo);
+            }
+        } else if(ev->type == SND_SEQ_EVENT_NOTEOFF) {
+            if(on_note_off_defined) {
+                call_lua_fn("on_note_off", chan, note, velo);
+                return 0;
+            } else {
+                return note_off(chan, note, velo);
+            }
+        }
     }
     else if(ev->type == SND_SEQ_EVENT_PITCHBEND)
         printf("Ch:%2d PitchB.: %5d\n",
