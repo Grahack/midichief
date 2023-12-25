@@ -15,6 +15,7 @@ static int on_note_off_defined = 0;
 static int on_cc_defined = 0;
 static int on_pc_defined = 0;
 
+// https://lucasklassmann.com/blog/2019-02-02-embedding-lua-in-c/
 static lua_State *L;
 
 #define CHK(stmt, msg) if((stmt) < 0) {puts("ERROR: "#msg); exit(1);}
