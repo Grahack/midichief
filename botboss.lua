@@ -8,9 +8,25 @@ print("BotBoss Lua definitions")
 --     pitch/shape  cutoff sweep trem
 
 local CC_map = {}
-CC_map[ 90] = 52  -- test
 CC_map[100] = 52
--- ...
+CC_map[101] = 53
+CC_map[102] = 54
+CC_map[103] = 23
+CC_map[104] = 25
+
+CC_map[105] = 41
+CC_map[106] = 42
+CC_map[107] = 43
+CC_map[108] = 45
+CC_map[109] = 44
+
+CC_map[110] = 15
+CC_map[111] = 18
+
+CC_map[112] = 89
+CC_map[113] = 33
+CC_map[114] = 34
+CC_map[115] = 35
 
 function on_note_on(chan, note, velo)
     if chan==9 and note == 69 then
