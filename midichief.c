@@ -262,22 +262,23 @@ int midi_process(const snd_seq_event_t *ev) {
 
 int main(int argc, char *argv[]) {
     L = luaL_newstate();
+    // expose some C code to Lua
+    lua_pushcfunction(L, reload_for_lua);
+    lua_setglobal(L, "reload_rules");
+    lua_pushcfunction(L, note_on_for_lua);
+    lua_setglobal(L, "note_on");
+    lua_pushcfunction(L, note_off_for_lua);
+    lua_setglobal(L, "note_off");
+    lua_pushcfunction(L, cc_for_lua);
+    lua_setglobal(L, "cc");
+    lua_pushcfunction(L, pc_for_lua);
+    lua_setglobal(L, "pc");
     // Check command line args
     if (argc == 1) {
         puts("No Lua file provided, raw-forwarding everything.");
     } else {
         filename = argv[1];
         load_lua_rules();
-        lua_pushcfunction(L, reload_for_lua);
-        lua_setglobal(L, "reload_rules");
-        lua_pushcfunction(L, note_on_for_lua);
-        lua_setglobal(L, "note_on");
-        lua_pushcfunction(L, note_off_for_lua);
-        lua_setglobal(L, "note_off");
-        lua_pushcfunction(L, cc_for_lua);
-        lua_setglobal(L, "cc");
-        lua_pushcfunction(L, pc_for_lua);
-        lua_setglobal(L, "pc");
     }
     // Commect to ALSA and process events
     midi_open();
