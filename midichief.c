@@ -154,7 +154,6 @@ int load_lua_rules() {
         // File exists, we close it then read it with the Lua tools
         fclose(file);
         printf("Reading MIDI logic from '%s'.\n", filename);
-        luaL_openlibs(L);
         if (luaL_dofile(L, filename) == LUA_OK) {
             lua_pop(L, lua_gettop(L));
         } else {
@@ -262,6 +261,7 @@ int midi_process(const snd_seq_event_t *ev) {
 
 int main(int argc, char *argv[]) {
     L = luaL_newstate();
+    luaL_openlibs(L);
     // expose some C code to Lua
     lua_pushcfunction(L, reload_for_lua);
     lua_setglobal(L, "reload_rules");
