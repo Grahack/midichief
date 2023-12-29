@@ -39,20 +39,33 @@ CC_map[114] = 90  -- pot 14
 CC_map[115] = 34  -- pot 15
 CC_map[116] = 35  -- pot 16
 
-function on_note_on(chan, note, velo)
-    if chan==9 and note == 69 then
-        print("ON chan 9 and note 69")
+function send_note(on_off, chan, note, velo)
+    if on_off == 1 then
+        note_on(chan, note, velo)
     else
-        note_on(chan, note-24, velo);
+        note_off(chan, note, velo)
     end
 end
 
-function on_note_off(chan, note, velo)
-    if chan==9 and note == 69 then
-        print("OFF chan 9 and note 69")
+function handle_note(on_off, chan, note, velo)
+    if chan == 9 and note == 46 then
+        -- a tweak for my electronic drums
+        send_note(on_off, 9, 36, velo);
+    elseif chan == 9 then
+        -- don't change the octave of the drums notes
+        send_note(on_off, chan, note, velo);
     else
-        note_off(chan, note-24, velo);
+        -- other notes are meant to be bass notes
+        send_note(on_off, chan, note-24, velo);
     end
+end
+
+function on_note_on(chan, note, velo)
+    handle_note(1, chan, note, velo)
+end
+
+function on_note_off(chan, note, velo)
+    handle_note(0, chan, note, velo)
 end
 
 function on_cc(chan, param, val)
