@@ -69,7 +69,7 @@ function on_note_off(chan, note, velo)
 end
 
 function on_cc(chan, param, val)
-    if chan==0 then
+    if chan == 0 then
         local new_param = CC_map[param]
         if new_param ~= nil then
             param = new_param
