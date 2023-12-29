@@ -1,5 +1,12 @@
 print("BotBoss Lua definitions")
 
+-- Used to play melodies
+function sleep(n)
+    os.execute("sleep " .. (n/1000))
+end
+
+local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
+
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
 -- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
@@ -55,10 +62,49 @@ function on_cc(chan, param, val)
 end
 
 function on_pc(chan, val)
-    if val == 115 then
+    if chan == 15 and val == 115 then
         reload_rules()
-    elseif val == 116 then
-        os.execute("sudo halt")
+        -- all notes off
+        for n = 0, 127 do
+            note_off(0, n, 127);
+            print("note off chan 1:", n)
+        end
+    elseif chan == 15 and val == 116 then
+        print("HALT attempt")
+        -- double tap emulation
+        local THIS_HALT_PRESS = os.time()
+        if THIS_HALT_PRESS - LAST_HALT_PRESS == 0 then
+            print("HALT")
+            note_on(0, 72, 120)
+            sleep(200)
+            note_off(0, 72, 120)
+            note_on(0, 67, 120)
+            sleep(200)
+            note_off(0, 67, 120)
+            note_on(0, 64, 120)
+            sleep(200)
+            note_off(0, 64, 120)
+            note_on(0, 60, 120)
+            sleep(200)
+            note_off(0, 60, 120)
+            os.execute("sudo halt")
+        else
+            LAST_HALT_PRESS = THIS_HALT_PRESS
+        end
+    elseif chan == 15 and val == 127 then
+        -- Play a melody at startup
+        note_on(0, 60, 120)
+        sleep(200)
+        note_off(0, 60, 120)
+        note_on(0, 64, 120)
+        sleep(200)
+        note_off(0, 64, 120)
+        note_on(0, 67, 120)
+        sleep(200)
+        note_off(0, 67, 120)
+        note_on(0, 72, 120)
+        sleep(200)
+        note_off(0, 72, 120)
     else
         pc(chan, val)
     end
