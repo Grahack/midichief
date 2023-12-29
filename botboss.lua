@@ -15,25 +15,29 @@ local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
 --     pitch/shape  cutoff sweep trem
 
 local CC_map = {}
-CC_map[100] = 52
-CC_map[101] = 53
-CC_map[102] = 54
-CC_map[103] = 23
-CC_map[104] = 25
-
-CC_map[105] = 41
-CC_map[106] = 42
-CC_map[107] = 43
-CC_map[108] = 45
-CC_map[109] = 44
-
-CC_map[110] = 15
-CC_map[111] = 18
-
-CC_map[112] = 89
-CC_map[113] = 33
-CC_map[114] = 34
-CC_map[115] = 35
+-- OSC
+CC_map[117] = 53  -- shift pot 1
+CC_map[101] = 54  -- pot 1
+CC_map[102] = 55  -- ...
+CC_map[103] = 24
+CC_map[104] = 26
+-- FILT
+CC_map[118] = 42  -- shift pot 9
+CC_map[109] = 43  -- pot 9
+CC_map[110] = 44
+CC_map[111] = 46
+CC_map[112] = 45
+-- EG
+CC_map[105] = 16  -- pot 5
+CC_map[113] = 19  -- pot 13
+-- MOD
+CC_map[106] = 88  -- pot 6
+CC_map[107] = 28  -- pot 7
+CC_map[108] = 29  -- pot 8
+-- REV
+CC_map[114] = 90  -- pot 14
+CC_map[115] = 34  -- pot 15
+CC_map[116] = 35  -- pot 16
 
 function on_note_on(chan, note, velo)
     if chan==9 and note == 69 then
