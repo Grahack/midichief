@@ -1,5 +1,9 @@
 print("BotBoss Lua definitions")
 
+function click()
+    print("click from Lua")
+end
+
 -- Used to play melodies
 function sleep(n)
     os.execute("sleep " .. (n/1000))

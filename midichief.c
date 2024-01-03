@@ -4,6 +4,8 @@
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
+#include <sys/time.h>
+#include <pthread.h>
 
 static snd_seq_t *seq_handle;
 static int client_id;
@@ -16,6 +18,12 @@ static int on_note_on_defined = 0;
 static int on_note_off_defined = 0;
 static int on_cc_defined = 0;
 static int on_pc_defined = 0;
+static int click_defined = 0;
+
+static double BPM = 120;
+// TOD is 'time of day', as is called the function from time.h
+struct timeval last_TOD, TOD;
+double elapsed = 0;
 
 // https://lucasklassmann.com/blog/2019-02-02-embedding-lua-in-c/
 static lua_State *L;
@@ -178,10 +186,14 @@ int load_lua_rules() {
         if (lua_isfunction(L, -1)) on_pc_defined = 1;
         else on_pc_defined = 0;
         lua_pop(L, lua_gettop(L));
+        lua_getglobal(L, "click");
+        if (lua_isfunction(L, -1)) click_defined = 1;
+        else click_defined = 0;
+        lua_pop(L, lua_gettop(L));
         printf("In %s are defined:\n", filename);
-        printf("  on_note_on:%d, on_note_off:%d, on_cc:%d, on_pc:%d\n",
+        printf("  on_note_on:%d on_note_off:%d on_cc:%d on_pc:%d click:%d\n",
             on_note_on_defined, on_note_off_defined,
-            on_cc_defined, on_pc_defined);
+            on_cc_defined, on_pc_defined, click_defined);
         // Thank you Lua!!!
         // We do note close the Lua state L for subsequent use
         // lua_close()
@@ -259,6 +271,24 @@ int midi_process(const snd_seq_event_t *ev) {
     return 0;
 }
 
+void *read_and_process_midi(void *vargp) {
+    while(1) {
+        if(midi_process(midi_read()) < 0) puts("Error in midi_process!");
+    }
+}
+
+void *emit_click(void *vargp) {
+    while(1) {
+        gettimeofday(&TOD, NULL);
+        elapsed = (TOD.tv_sec - last_TOD.tv_sec) * 1000.0;    // s to ms
+        elapsed += (TOD.tv_usec - last_TOD.tv_usec) / 1000.0; // us to ms
+        if(elapsed > 60000/BPM) {
+            call_lua_fn("click", 0, 0, 0);
+            last_TOD = TOD;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     L = luaL_newstate();
     luaL_openlibs(L);
@@ -282,8 +312,17 @@ int main(int argc, char *argv[]) {
     }
     // Commect to ALSA and process events
     midi_open();
-    while(1)
-        if(midi_process(midi_read()) < 0) puts("Error in midi_process!");
-    return -1;
+    // a thread for reading and processing MIDI in
+    pthread_t tid1;
+    pthread_create(&tid1, NULL, read_and_process_midi, (void *)&tid1);
+    // a thread (if needed) for a click
+    if (click_defined) {
+        // start timer
+        gettimeofday(&last_TOD, NULL);
+        pthread_t tid2;
+        pthread_create(&tid2, NULL, emit_click, (void *)&tid2);
+    }
+    pthread_exit(NULL);
+    return 0;
 }
 
