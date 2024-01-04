@@ -27,6 +27,7 @@ double elapsed = 0;
 
 // https://lucasklassmann.com/blog/2019-02-02-embedding-lua-in-c/
 static lua_State *L;
+lua_State *L2;  // child state for the emit_click thread
 
 #define CHK(stmt, msg) if((stmt) < 0) {puts("ERROR: "#msg); exit(1);}
 void midi_open(void) {
@@ -283,8 +284,18 @@ void *emit_click(void *vargp) {
         elapsed = (TOD.tv_sec - last_TOD.tv_sec) * 1000.0;    // s to ms
         elapsed += (TOD.tv_usec - last_TOD.tv_usec) / 1000.0; // us to ms
         if(elapsed > 60000/BPM) {
-            call_lua_fn("click", 0, 0, 0);
+            lua_getglobal(L2, "click");
+            if (lua_isfunction(L2, -1)) puts("Call Lua click");
+            if (lua_pcall(L2, 0, 1, 0) == LUA_OK) lua_pop(L2, lua_gettop(L2));
             last_TOD = TOD;
+            // grab the BPM in the Lua state
+            lua_getglobal(L2, "BPM");
+            if (lua_isnumber(L2, -1)) {
+                BPM = lua_tonumber(L2, -1);
+                lua_pop(L2, 1);
+            } else {
+                puts("No global var 'BPM' in the Lua state!");
+            }
         }
     }
 }
@@ -303,6 +314,9 @@ int main(int argc, char *argv[]) {
     lua_setglobal(L, "cc");
     lua_pushcfunction(L, pc_for_lua);
     lua_setglobal(L, "pc");
+    // this is for the emit_click thread
+    L2 = lua_newthread(L);
+    luaL_openlibs(L2);
     // Check command line args
     if (argc == 1) {
         puts("No Lua file provided, raw-forwarding everything.");

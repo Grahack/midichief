@@ -1,7 +1,7 @@
 print("BotBoss Lua definitions")
 
 function click()
-    print("click from Lua")
+    print("click from Lua", BPM)
 end
 
 -- Used to play melodies
@@ -85,6 +85,7 @@ end
 function on_pc(chan, val)
     if chan == 15 and val == 115 then
         reload_rules()
+        BPM = 60  -- just a test
         -- all notes off
         for n = 0, 127 do
             note_off(0, n, 127);
