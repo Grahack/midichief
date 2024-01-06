@@ -122,7 +122,13 @@ void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
     lua_pushinteger(L, arg1);
     lua_pushinteger(L, arg2);
     lua_pushinteger(L, arg3);
-    if (lua_pcall(L, 3, 1, 0) == LUA_OK) lua_pop(L, lua_gettop(L));
+    if (lua_pcall(L, 3, 1, 0) == LUA_OK) {
+        lua_pop(L, lua_gettop(L));
+    } else {
+        printf("Error in Lua function %s:\n", fn_name);
+        puts(lua_tostring(L, lua_gettop(L)));
+        lua_pop(L, lua_gettop(L));
+    }
 }
 
 int note_on_for_lua(lua_State *L) {
