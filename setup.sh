@@ -20,7 +20,9 @@ connect_ALSA() {
 
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
-connect_ALSA "Arturia":0 "MIDI Chief":0
+connect_ALSA "Launchkey":0 "MIDI Chief":0
+connect_ALSA "Launchkey":1 "MIDI Chief":0
+connect_ALSA "MIDI Chief":1 "Launchkey":1
 connect_ALSA "EV-10":0 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "EV-10":0
 $BB_DIR/divs-midi-utilities/bin/sendmidi --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
