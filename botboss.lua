@@ -52,12 +52,21 @@ function send_note(on_off, chan, note, velo)
 end
 
 function handle_note(on_off, chan, note, velo)
-    if chan == 9 and note == 46 then
+    if chan == 9 then
         -- a tweak for my electronic drums
-        send_note(on_off, 9, 36, velo);
-    elseif chan == 9 then
-        -- don't change the octave of the drums notes
-        send_note(on_off, chan, note, velo);
+        -- keyboard pads are:
+        -- 24 36 C1  kick
+        -- 2a 42 F#1 HH
+        -- 26 38 D1  snare
+        -- I need to translate snare 26 38 to kick 24 36
+        if note == 38 then
+            send_note(on_off, 9, 36, velo);
+        -- and to translate HH 2e 46 to HH 2a 42
+        elseif note == 46 then
+            send_note(on_off, 9, 42, velo);
+        else
+            send_note(on_off, chan, note, velo);
+        end
     else
         -- other notes are meant to be bass notes
         send_note(on_off, chan, note-24, velo);
