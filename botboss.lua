@@ -33,6 +33,11 @@ function halt_attempt()
     end
 end
 
+function in_control()
+    -- In Control mode for Launchkey
+    note_on(0, 12, 127)
+end
+
 local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
 
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
@@ -117,6 +122,7 @@ end
 
 function on_pc(chan, val)
     if chan == 15 and val == 115 then
+        in_control()
         reload_rules()
         BPM = 60  -- just a test
         -- all notes off
@@ -127,6 +133,7 @@ function on_pc(chan, val)
     elseif chan == 15 and val == 116 then
         halt_attempt()
     elseif chan == 15 and val == 127 then
+        in_control()
         -- Play a melody at startup
         note_on(1, 60, 120)
         sleep(200)
