@@ -38,6 +38,46 @@ function incontrol()
     note_on(0, 12, 127)
 end
 
+-- codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
+local cc_fns = {}
+local n_fns = {}
+
+cc_fns[106] = track_L
+cc_fns[107] = track_R
+
+cc_fns[21] = pot_1
+cc_fns[22] = pot_2
+cc_fns[23] = pot_3
+cc_fns[24] = pot_4
+cc_fns[25] = pot_5
+cc_fns[26] = pot_6
+cc_fns[27] = pot_7
+cc_fns[28] = pot_8
+
+n_fns[ 96] = pad_01
+n_fns[ 97] = pad_02
+n_fns[ 98] = pad_03
+n_fns[ 99] = pad_04
+n_fns[100] = pad_05
+n_fns[101] = pad_06
+n_fns[102] = pad_07
+n_fns[103] = pad_08
+
+n_fns[112] = pad_09
+n_fns[113] = pad_10
+n_fns[114] = pad_11
+n_fns[115] = pad_12
+n_fns[116] = pad_13
+n_fns[117] = pad_14
+n_fns[118] = pad_15
+n_fns[119] = pad_16
+
+n_fns[104] = play_up
+n_fns[105] = play_down
+
+cc_fns[104] = scene_up
+cc_fns[105] = scene_down
+
 local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
 
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
@@ -72,6 +112,14 @@ CC_map[114] = 90  -- pot 14
 CC_map[115] = 34  -- pot 15
 CC_map[116] = 35  -- pot 16
 
+function pad_01(on_off)
+    print("pad 1", on_off)
+end
+
+function pot_1(value)
+    print("pot 1:", value)
+end
+
 function send_note(on_off, chan, note, velo)
     if on_off == 1 then
         note_on(chan, note, velo)
@@ -81,7 +129,15 @@ function send_note(on_off, chan, note, velo)
 end
 
 function handle_note(on_off, chan, note, velo)
-    if chan == 9 then
+    if chan == 0 then
+        -- chan 0(1) is from the Launchkey in InControl mode
+        local f = n_fns[note]
+        if f ~= nil then
+            f(on_off)  -- velocity is useless (127 for on and 0 for off)
+        else
+            print("No fn to handle this note:", note, "(InControl mode)")
+        end
+    elseif chan == 9 then
         -- a tweak for my electronic drums
         -- keyboard pads are:
         -- 24 36 C1  kick
@@ -112,12 +168,14 @@ end
 
 function on_cc(chan, param, val)
     if chan == 0 then
-        local new_param = CC_map[param]
-        if new_param ~= nil then
-            param = new_param
+        -- chan 0(1) is from the Launchkey in InControl mode
+        local f = cc_fns[param]
+        if f ~= nil then
+            f(val)
+        else
+            print("No fn to handle this CC:", param, "(InControl mode)")
         end
     end
-    cc(chan, param, val)
 end
 
 function on_pc(chan, val)
