@@ -9,6 +9,30 @@ function sleep(n)
     os.execute("sleep " .. (n/1000))
 end
 
+function halt_attempt()
+    print("HALT attempt")
+    -- double tap emulation
+    local THIS_HALT_PRESS = os.time()
+    if THIS_HALT_PRESS - LAST_HALT_PRESS == 0 then
+        print("HALT")
+        note_on(0, 72, 120)
+        sleep(200)
+        note_off(0, 72, 120)
+        note_on(0, 67, 120)
+        sleep(200)
+        note_off(0, 67, 120)
+        note_on(0, 64, 120)
+        sleep(200)
+        note_off(0, 64, 120)
+        note_on(0, 60, 120)
+        sleep(200)
+        note_off(0, 60, 120)
+        os.execute("sudo halt")
+    else
+        LAST_HALT_PRESS = THIS_HALT_PRESS
+    end
+end
+
 local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
 
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
@@ -101,27 +125,7 @@ function on_pc(chan, val)
             print("note off chan 0(1):", n)
         end
     elseif chan == 15 and val == 116 then
-        print("HALT attempt")
-        -- double tap emulation
-        local THIS_HALT_PRESS = os.time()
-        if THIS_HALT_PRESS - LAST_HALT_PRESS == 0 then
-            print("HALT")
-            note_on(0, 72, 120)
-            sleep(200)
-            note_off(0, 72, 120)
-            note_on(0, 67, 120)
-            sleep(200)
-            note_off(0, 67, 120)
-            note_on(0, 64, 120)
-            sleep(200)
-            note_off(0, 64, 120)
-            note_on(0, 60, 120)
-            sleep(200)
-            note_off(0, 60, 120)
-            os.execute("sudo halt")
-        else
-            LAST_HALT_PRESS = THIS_HALT_PRESS
-        end
+        halt_attempt()
     elseif chan == 15 and val == 127 then
         -- Play a melody at startup
         note_on(0, 60, 120)
