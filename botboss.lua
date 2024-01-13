@@ -98,7 +98,7 @@ function on_pc(chan, val)
         -- all notes off
         for n = 0, 127 do
             note_off(0, n, 127);
-            print("note off chan 1:", n)
+            print("note off chan 0(1):", n)
         end
     elseif chan == 15 and val == 116 then
         print("HALT attempt")
