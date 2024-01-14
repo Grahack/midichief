@@ -245,7 +245,7 @@ function on_pc(chan, val)
     if chan == 15 and val == 115 then
         incontrol()
         reload_rules()
-        BPM = 60  -- just a test
+        BPM = 1  -- just a test, and to lessen the log messages
         -- all notes off
         for n = 0, 127 do
             note_off(0, n, 127);
