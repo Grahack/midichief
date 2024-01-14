@@ -5,6 +5,7 @@ local page = 0  -- can be any non negative integer
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
+local CHAN_NTS = 1 -- NTS channel
 -- constants for LED colors (Launchkey in InControl mode)
 local BLACK = 0
 local RED = 1
@@ -256,20 +257,47 @@ function on_pc(chan, val)
         halt_attempt()
     elseif chan == 15 and val == 127 then
         incontrol()
-        -- Play a melody at startup
-        note_on(1, 60, 120)
-        sleep(200)
-        note_off(1, 60, 120)
-        note_on(1, 64, 120)
-        sleep(200)
-        note_off(1, 64, 120)
-        note_on(1, 67, 120)
-        sleep(200)
-        note_off(1, 67, 120)
-        note_on(1, 72, 120)
-        sleep(200)
-        note_off(1, 72, 120)
+        melody_up()
     else
+        -- forward
         pc(chan, val)
     end
+end
+
+function panic()
+    -- all notes off
+    for n = 0, 127 do
+        note_off(0, n, 127);
+        print("note off chan 0(1):", n)
+    end
+end
+
+function melody_down()
+    note_on(CHAN_NTS, 72, 120)
+    sleep(200)
+    note_off(CHAN_NTS, 72, 120)
+    note_on(CHAN_NTS, 67, 120)
+    sleep(200)
+    note_off(CHAN_NTS, 67, 120)
+    note_on(CHAN_NTS, 64, 120)
+    sleep(200)
+    note_off(CHAN_NTS, 64, 120)
+    note_on(CHAN_NTS, 60, 120)
+    sleep(200)
+    note_off(CHAN_NTS, 60, 120)
+end
+
+function melody_up()
+    note_on(1, 60, 120)
+    sleep(200)
+    note_off(1, 60, 120)
+    note_on(1, 64, 120)
+    sleep(200)
+    note_off(1, 64, 120)
+    note_on(1, 67, 120)
+    sleep(200)
+    note_off(1, 67, 120)
+    note_on(1, 72, 120)
+    sleep(200)
+    note_off(1, 72, 120)
 end
