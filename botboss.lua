@@ -12,7 +12,7 @@ local YELLOW = 17
 local GREEN = 16
 
 local LED_map = {}
-LED_map["play_up"] = 104
+LED_map["play_up"]   = 104
 LED_map["play_down"] = 120
 
 function LED(where, color)
