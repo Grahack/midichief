@@ -2,6 +2,7 @@ print("BotBoss Lua definitions")
 
 -- state variables
 local page = 0  -- can be any non negative integer
+local HALT_PRESS = 0  -- to implement long press
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -15,6 +16,7 @@ local GREEN = 16
 local LED_map = {}
 LED_map["play_up"]   = 104
 LED_map["play_down"] = 120
+LED_map["pad_01"] = 96
 
 function LED(where, color)
     note_on(CHAN_LK, LED_map[where], color)
@@ -55,30 +57,6 @@ end
 -- Used to play melodies
 function sleep(n)
     os.execute("sleep " .. (n/1000))
-end
-
-function halt_attempt()
-    print("HALT attempt")
-    -- double tap emulation
-    local THIS_HALT_PRESS = os.time()
-    if THIS_HALT_PRESS - LAST_HALT_PRESS == 0 then
-        print("HALT")
-        note_on(1, 72, 120)
-        sleep(200)
-        note_off(1, 72, 120)
-        note_on(1, 67, 120)
-        sleep(200)
-        note_off(1, 67, 120)
-        note_on(1, 64, 120)
-        sleep(200)
-        note_off(1, 64, 120)
-        note_on(1, 60, 120)
-        sleep(200)
-        note_off(1, 60, 120)
-        os.execute("sudo halt")
-    else
-        LAST_HALT_PRESS = THIS_HALT_PRESS
-    end
 end
 
 function incontrol()
@@ -126,8 +104,6 @@ n_fns[120] = "play_down"
 cc_fns[104] = "scene_up"
 cc_fns[105] = "scene_down"
 
-local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
-
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
 -- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
@@ -162,6 +138,31 @@ CC_map[116] = 35  -- pot 16
 
 function pad_01_0(on_off)
     print("pad 1", on_off)
+end
+
+function pad_01_1(on_off)
+    -- reload or halt
+    if on_off == 1 then
+        LED("pad_01", YELLOW)
+        HALT_PRESS = os.time()
+    else
+        local HALT_RELEASE = os.time()
+        print(HALT_RELEASE - HALT_PRESS)
+        if HALT_RELEASE - HALT_PRESS >= 2 then
+            LED("pad_01", RED)
+            print("HALT")
+            melody_down()
+            LED("pad_01", BLACK)
+            os.execute("sudo halt")
+        else
+            LED("pad_01", GREEN)
+            BPM = 1  -- just a test, and to lessen the log messages
+            reload_rules()
+            panic()
+            update_LEDs_page()  -- because panic() blackens LEDs
+            LED("pad_01", BLACK)
+        end
+    end
 end
 
 function pot_1_0(value)
@@ -243,19 +244,8 @@ function on_cc(chan, param, val)
 end
 
 function on_pc(chan, val)
-    if chan == 15 and val == 115 then
-        incontrol()
-        reload_rules()
-        BPM = 1  -- just a test, and to lessen the log messages
-        -- all notes off
-        for n = 0, 127 do
-            note_off(0, n, 127);
-            print("note off chan 0(1):", n)
-        end
-        update_LEDs_page()
-    elseif chan == 15 and val == 116 then
-        halt_attempt()
-    elseif chan == 15 and val == 127 then
+    if chan == 15 and val == 127 then
+        -- startup
         incontrol()
         melody_up()
     else
