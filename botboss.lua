@@ -7,6 +7,7 @@ local HALT_PRESS = 0  -- to implement long press
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
+local CHAN_drums = 9
 -- constants for LED colors (Launchkey in InControl mode)
 local BLACK = 0
 local RED = 1
@@ -182,7 +183,18 @@ function handle_note(on_off, chan, note, velo)
     if chan == 1 then
         -- chan 1(2) is from the Launchkey in normal mode, or the keys
         -- these notes are for the NTS and are meant to be bass notes
-        send_note(on_off, chan, note-24, velo);
+        -- except for the highest on the keyboard: drum sounds
+        if note == 70 then      -- HH
+            send_note(on_off, CHAN_drums, 42, velo);
+        elseif note == 68 then  -- kick
+            send_note(on_off, CHAN_drums, 36, velo);
+        elseif note == 72 then  -- snare
+            send_note(on_off, CHAN_drums, 40, velo);
+        elseif note == 71 then  -- open HH
+            send_note(on_off, CHAN_drums, 46, velo);
+        else
+            send_note(on_off, chan, note-24, velo);
+        end
     elseif chan == 0 then
         -- chan 0(1) is from the Launchkey in InControl mode
         local prefix = n_fns[note]
