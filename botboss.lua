@@ -246,6 +246,7 @@ function on_pc(chan, val)
     if chan == 15 and val == 127 then
         -- startup
         incontrol()
+        update_LEDs()
         melody_up()
     else
         -- forward
