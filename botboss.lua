@@ -29,7 +29,7 @@ end
 function play_up_0(on_off)
     if on_off == 0 then  -- on release
         page = 1
-        update_LEDs_page()
+        update_LEDs()
     end
 end
 
@@ -37,11 +37,11 @@ function play_down_1(on_off)
     -- on_off == 0 is button release
     if on_off == 0 then  -- on release
         page = 0
-        update_LEDs_page()
+        update_LEDs()
     end
 end
 
-function update_LEDs_page()
+function update_LEDs()
     if page == 0 then
         LED("play_up", BLACK)
         LED("play_down", YELLOW)
@@ -159,7 +159,7 @@ function pad_01_1(on_off)
             BPM = 1  -- just a test, and to lessen the log messages
             reload_rules()
             panic()
-            update_LEDs_page()  -- because panic() blackens LEDs
+            update_LEDs()  -- because panic() blackens LEDs
             LED("pad_01", BLACK)
         end
     end
