@@ -159,7 +159,6 @@ function pad_01_1(on_off)
             BPM = 1  -- just a test, and to lessen the log messages
             reload_rules()
             panic()
-            update_LEDs()  -- because panic() blackens LEDs
             LED("pad_01", BLACK)
         end
     end
@@ -260,6 +259,8 @@ function panic()
         note_off(0, n, 127);
         print("note off chan 0(1):", n)
     end
+    -- note off events  blackens LEDs so we have to update everything
+    update_LEDs()
 end
 
 function melody_down()
