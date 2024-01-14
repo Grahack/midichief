@@ -45,9 +45,11 @@ function update_LEDs()
     if page == 0 then
         LED("play_up", BLACK)
         LED("play_down", YELLOW)
+        LED("pad_01", BLACK)
     elseif page == 1 then
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
+        LED("pad_01", GREEN)
     else
         LED("play_up", RED)
         LED("play_down", RED)
