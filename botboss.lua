@@ -1,7 +1,54 @@
 print("BotBoss Lua definitions")
 
+-- state variables
+local page = 0  -- can be any non negative integer
+
+-- CONSTANTS
+local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
+-- constants for LED colors (Launchkey in InControl mode)
+local BLACK = 0
+local RED = 1
+local YELLOW = 17
+local GREEN = 16
+
+local LED_map = {}
+LED_map["play_up"] = 104
+LED_map["play_down"] = 120
+
+function LED(where, color)
+    note_on(CHAN_LK, LED_map[where], color)
+end
+
 function click()
     print("click from Lua", BPM)
+end
+
+function play_up_0(on_off)
+    if on_off == 0 then  -- on release
+        page = 1
+        update_LEDs_page()
+    end
+end
+
+function play_down_1(on_off)
+    -- on_off == 0 is button release
+    if on_off == 0 then  -- on release
+        page = 0
+        update_LEDs_page()
+    end
+end
+
+function update_LEDs_page()
+    if page == 0 then
+        LED("play_up", BLACK)
+        LED("play_down", YELLOW)
+    elseif page == 1 then
+        LED("play_up", YELLOW)
+        LED("play_down", BLACK)
+    else
+        LED("play_up", RED)
+        LED("play_down", RED)
+    end
 end
 
 -- Used to play melodies
@@ -42,41 +89,41 @@ end
 local cc_fns = {}
 local n_fns = {}
 
-cc_fns[106] = track_L
-cc_fns[107] = track_R
+cc_fns[106] = "track_L"
+cc_fns[107] = "track_R"
 
-cc_fns[21] = pot_1
-cc_fns[22] = pot_2
-cc_fns[23] = pot_3
-cc_fns[24] = pot_4
-cc_fns[25] = pot_5
-cc_fns[26] = pot_6
-cc_fns[27] = pot_7
-cc_fns[28] = pot_8
+cc_fns[21] = "pot_1"
+cc_fns[22] = "pot_2"
+cc_fns[23] = "pot_3"
+cc_fns[24] = "pot_4"
+cc_fns[25] = "pot_5"
+cc_fns[26] = "pot_6"
+cc_fns[27] = "pot_7"
+cc_fns[28] = "pot_8"
 
-n_fns[ 96] = pad_01
-n_fns[ 97] = pad_02
-n_fns[ 98] = pad_03
-n_fns[ 99] = pad_04
-n_fns[100] = pad_05
-n_fns[101] = pad_06
-n_fns[102] = pad_07
-n_fns[103] = pad_08
+n_fns[ 96] = "pad_01"
+n_fns[ 97] = "pad_02"
+n_fns[ 98] = "pad_03"
+n_fns[ 99] = "pad_04"
+n_fns[100] = "pad_05"
+n_fns[101] = "pad_06"
+n_fns[102] = "pad_07"
+n_fns[103] = "pad_08"
 
-n_fns[112] = pad_09
-n_fns[113] = pad_10
-n_fns[114] = pad_11
-n_fns[115] = pad_12
-n_fns[116] = pad_13
-n_fns[117] = pad_14
-n_fns[118] = pad_15
-n_fns[119] = pad_16
+n_fns[112] = "pad_09"
+n_fns[113] = "pad_10"
+n_fns[114] = "pad_11"
+n_fns[115] = "pad_12"
+n_fns[116] = "pad_13"
+n_fns[117] = "pad_14"
+n_fns[118] = "pad_15"
+n_fns[119] = "pad_16"
 
-n_fns[104] = play_up
-n_fns[105] = play_down
+n_fns[104] = "play_up"
+n_fns[120] = "play_down"
 
-cc_fns[104] = scene_up
-cc_fns[105] = scene_down
+cc_fns[104] = "scene_up"
+cc_fns[105] = "scene_down"
 
 local LAST_HALT_PRESS = 0  -- to implement a kind of double tap
 
@@ -112,11 +159,11 @@ CC_map[114] = 90  -- pot 14
 CC_map[115] = 34  -- pot 15
 CC_map[116] = 35  -- pot 16
 
-function pad_01(on_off)
+function pad_01_0(on_off)
     print("pad 1", on_off)
 end
 
-function pot_1(value)
+function pot_1_0(value)
     print("pot 1:", value)
 end
 
@@ -129,13 +176,23 @@ function send_note(on_off, chan, note, velo)
 end
 
 function handle_note(on_off, chan, note, velo)
-    if chan == 0 then
+    if chan == 1 then
+        -- chan 1(2) is from the Launchkey in normal mode, or the keys
+        -- these notes are for the NTS and are meant to be bass notes
+        send_note(on_off, chan, note-24, velo);
+    elseif chan == 0 then
         -- chan 0(1) is from the Launchkey in InControl mode
-        local f = n_fns[note]
-        if f ~= nil then
-            f(on_off)  -- velocity is useless (127 for on and 0 for off)
+        local prefix = n_fns[note]
+        if prefix == nil then
+            print("No prefix to handle this note:", note, "(InControl mode)")
         else
-            print("No fn to handle this note:", note, "(InControl mode)")
+            local f_name = prefix .. "_" .. page
+            local f = _G[f_name]
+            if f == nil then
+                print("No fn to handle a note:", f_name, "(InControl mode)")
+            else
+                f(on_off)  -- velocity is useless (127 for on and 0 for off)
+            end
         end
     elseif chan == 9 then
         -- a tweak for my electronic drums
@@ -153,8 +210,8 @@ function handle_note(on_off, chan, note, velo)
             send_note(on_off, chan, note, velo);
         end
     else
-        -- other notes are meant to be bass notes
-        send_note(on_off, chan, note-24, velo);
+        -- forward
+        send_note(on_off, chan, note, velo);
     end
 end
 
@@ -169,11 +226,17 @@ end
 function on_cc(chan, param, val)
     if chan == 0 then
         -- chan 0(1) is from the Launchkey in InControl mode
-        local f = cc_fns[param]
-        if f ~= nil then
-            f(val)
+        local prefix = cc_fns[param]
+        if prefix == nil then
+            print("No prefix to handle this CC:", param, "(InControl mode)")
         else
-            print("No fn to handle this CC:", param, "(InControl mode)")
+            local f_name = prefix .. "_" .. page
+            local f = _G[f_name]
+            if f == nil then
+                print("No fn to handle a CC:", f_name, "(InControl mode)")
+            else
+                f(val)
+            end
         end
     end
 end
@@ -188,6 +251,7 @@ function on_pc(chan, val)
             note_off(0, n, 127);
             print("note off chan 0(1):", n)
         end
+        update_LEDs_page()
     elseif chan == 15 and val == 116 then
         halt_attempt()
     elseif chan == 15 and val == 127 then
