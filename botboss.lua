@@ -2,7 +2,7 @@ print("BotBoss Lua definitions")
 
 -- state variables
 local page = 0  -- can be any non negative integer
-local HALT_PRESS = 0  -- to implement long press
+local halt_press = 0  -- to implement long press
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -147,11 +147,10 @@ function pad_01_1(on_off)
     -- reload or halt
     if on_off == 1 then
         LED("pad_01", YELLOW)
-        HALT_PRESS = os.time()
+        halt_press = os.time()
     else
-        local HALT_RELEASE = os.time()
-        print(HALT_RELEASE - HALT_PRESS)
-        if HALT_RELEASE - HALT_PRESS >= 2 then
+        local halt_release = os.time()
+        if halt_release - halt_press >= 2 then
             LED("pad_01", RED)
             print("HALT")
             melody_down()
