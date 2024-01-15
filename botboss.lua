@@ -58,7 +58,9 @@ function click()
     end
     if click_mode == 2 or click_mode == 3 then
         click_lit = not click_lit
-        update_LEDs()
+        if page == 0 then
+            update_LEDs()
+        end
     end
 end
 
