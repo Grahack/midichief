@@ -236,7 +236,6 @@ function pad_01_1(on_off)
             BPM = 60
             reload_rules()
             panic()
-            LED("pad_01", BLACK)
         end
     end
 end
