@@ -2,29 +2,64 @@ print("BotBoss Lua definitions")
 
 -- state variables
 local page = 0  -- can be any non negative integer
-local halt_press = 0  -- to implement long press
+local halt_press = 0   -- to implement long press
+local click_press = 0  -- to implement long press
+local click_edit  = false  -- edit mode activated?
+local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
+local click_note  = 42  -- HH by default
+local click_lit   = false  -- to implement alternating LEDs
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_drums = 9
+local NOTE_HH   = 42
+local NOTE_KICK = 36
+local NOTE_SN   = 40
+local NOTE_O_HH = 46
 -- constants for LED colors (Launchkey in InControl mode)
 local BLACK = 0
 local RED = 1
 local YELLOW = 17
 local GREEN = 16
+local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 
 local LED_map = {}
 LED_map["play_up"]   = 104
 LED_map["play_down"] = 120
-LED_map["pad_01"] = 96
+LED_map["pad_01"] =  96
+LED_map["pad_02"] =  97
+LED_map["pad_03"] =  98
+LED_map["pad_04"] =  99
+LED_map["pad_05"] = 100
+LED_map["pad_06"] = 101
+LED_map["pad_07"] = 102
+LED_map["pad_08"] = 103
+LED_map["pad_09"] = 112
+LED_map["pad_10"] = 113
+LED_map["pad_11"] = 114
+LED_map["pad_12"] = 115
+LED_map["pad_13"] = 116
+LED_map["pad_14"] = 117
+LED_map["pad_15"] = 118
+LED_map["pad_16"] = 119
 
 function LED(where, color)
     note_on(CHAN_LK, LED_map[where], color)
 end
 
 function click()
-    print("click from Lua", BPM)
+    if click_mode == 0 then
+        return
+    end
+    if click_mode == 1 or click_mode == 3 then
+        note_on(CHAN_drums, click_note, 127)
+        note_off(CHAN_drums, click_note, 127)
+    end
+    if click_mode == 2 or click_mode == 3 then
+        click_lit = not click_lit
+        update_LEDs()
+    end
 end
 
 function play_up_0(on_off)
@@ -46,11 +81,39 @@ function update_LEDs()
     if page == 0 then
         LED("play_up", BLACK)
         LED("play_down", YELLOW)
-        LED("pad_01", BLACK)
+        -- click
+        if click_lit then
+            LED("pad_01", YELLOW)
+            LED("pad_02", YELLOW)
+            LED("pad_03", YELLOW)
+            LED("pad_04", YELLOW)
+            LED("pad_09", YELLOW)
+            LED("pad_10", YELLOW)
+            LED("pad_11", YELLOW)
+            LED("pad_12", YELLOW)
+        else
+            LED("pad_01", BLACK)
+            LED("pad_02", BLACK)
+            LED("pad_03", BLACK)
+            LED("pad_04", BLACK)
+            LED("pad_09", BLACK)
+            LED("pad_10", BLACK)
+            LED("pad_11", BLACK)
+            LED("pad_12", BLACK)
+        end
+        LED("pad_05", click_colors[click_mode + 1])
     elseif page == 1 then
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
         LED("pad_01", GREEN)
+        LED("pad_02", BLACK)
+        LED("pad_03", BLACK)
+        LED("pad_04", BLACK)
+        LED("pad_05", BLACK)
+        LED("pad_09", BLACK)
+        LED("pad_10", BLACK)
+        LED("pad_11", BLACK)
+        LED("pad_12", BLACK)
     else
         LED("play_up", RED)
         LED("play_down", RED)
@@ -139,8 +202,20 @@ CC_map[114] = 90  -- pot 14
 CC_map[115] = 34  -- pot 15
 CC_map[116] = 35  -- pot 16
 
-function pad_01_0(on_off)
-    print("pad 1", on_off)
+function pad_05_0(on_off)
+    -- click edit
+    if on_off == 1 then
+        click_press = os.time()
+        click_edit = true
+        LED("pad_05", BLACK)
+    else
+        click_edit = false
+        local click_release = os.time()
+        if click_release - click_press <= 1 then
+            click_mode = (click_mode + 1) % 4
+            update_LEDs()
+        end
+    end
 end
 
 function pad_01_1(on_off)
@@ -158,7 +233,7 @@ function pad_01_1(on_off)
             os.execute("sudo halt")
         else
             LED("pad_01", GREEN)
-            BPM = 1  -- just a test, and to lessen the log messages
+            BPM = 60
             reload_rules()
             panic()
             LED("pad_01", BLACK)
