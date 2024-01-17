@@ -215,6 +215,9 @@ function pad_05_0(on_off)
         local click_release = os.time()
         if click_release - click_press <= 1 then
             click_mode = (click_mode + 1) % 4
+            if click_mode <= 1 then
+                click_lit = false
+            end
             update_LEDs()
         end
     end
