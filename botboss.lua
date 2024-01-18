@@ -8,11 +8,14 @@ local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
 local click_note  = 42  -- HH by default
 local click_lit   = false  -- to implement alternating LEDs
+local synth_page  = "05"  -- OSC (pad numbers)
+-- OSC = 1   EG = 6   REV = 7   FILT = 13   MOD = 14   DELAY = 15
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_drums = 9
+local DUMMY_CC = 127
 local NOTE_HH   = 42
 local NOTE_KICK = 36
 local NOTE_SN   = 40
@@ -68,6 +71,7 @@ function play_up_0(on_off)
     if on_off == 0 then  -- on release
         page = 1
         update_LEDs()
+        LED("pad_"..synth_page, GREEN)
     end
 end
 
@@ -76,6 +80,7 @@ function play_down_1(on_off)
     if on_off == 0 then  -- on release
         page = 0
         update_LEDs()
+        LED("pad_"..synth_page, BLACK)
     end
 end
 
@@ -181,28 +186,21 @@ cc_fns[105] = "scene_down"
 
 local CC_map = {}
 -- OSC
-CC_map[117] = 53  -- shift pot 1
-CC_map[101] = 54  -- pot 1
-CC_map[102] = 55  -- ...
-CC_map[103] = 24
-CC_map[104] = 26
+CC_map["05"] = {54, 55, 24, 26}
+CC_map["05"][0] = 53  -- a faire circuler!!!!!!!!!!!!!
 -- FILT
-CC_map[118] = 42  -- shift pot 9
-CC_map[109] = 43  -- pot 9
-CC_map[110] = 44
-CC_map[111] = 46
-CC_map[112] = 45
+CC_map["13"] = {43, 44, 46, 45}
+CC_map["13"][0] = 42  -- !!!!!!!!!!!!
 -- EG
-CC_map[105] = 16  -- pot 5
-CC_map[113] = 19  -- pot 13
+CC_map["06"] = {16, 19, 21, 20}
 -- MOD
-CC_map[106] = 88  -- pot 6
-CC_map[107] = 28  -- pot 7
-CC_map[108] = 29  -- pot 8
+CC_map["14"] = {28, 29, DUMMY_CC, DUMMY_CC}
+   -- 88  -- circuler !!!!!!!!!!!!!!
+-- DELAY
+CC_map["15"] = {30, 31, DUMMY_CC, 33}
 -- REV
-CC_map[114] = 90  -- pot 14
-CC_map[115] = 34  -- pot 15
-CC_map[116] = 35  -- pot 16
+CC_map["07"] = {34, 35, DUMMY_CC, 36}
+--  90  -- circuler
 
 function pad_05_0(on_off)
     -- click edit
@@ -245,9 +243,36 @@ function pad_01_1(on_off)
     end
 end
 
-function pot_1_0(value)
-    print("pot 1:", value)
+function synth_pad(pad, on_off)
+    if on_off == 1 then
+        LED("pad_"..pad, YELLOW)
+    else
+        -- switch off old pad
+        LED("pad_"..synth_page, BLACK)
+        -- update current page and light the new pad
+        synth_page = pad
+        LED("pad_"..synth_page, GREEN)
+    end
 end
+
+-- handling pads for OSC EG REV FILT MOD DELAY
+function pad_05_1(on_off) synth_pad("05", on_off) end
+function pad_06_1(on_off) synth_pad("06", on_off) end
+function pad_07_1(on_off) synth_pad("07", on_off) end
+function pad_13_1(on_off) synth_pad("13", on_off) end
+function pad_14_1(on_off) synth_pad("14", on_off) end
+function pad_15_1(on_off) synth_pad("15", on_off) end
+
+function synth_pot(pot, value)
+    param = CC_map[synth_page][pot]
+    cc(CHAN_NTS, param, value)
+end
+
+-- handling pots for synth params
+function pot_5_1(value) synth_pot(1, value) end
+function pot_6_1(value) synth_pot(2, value) end
+function pot_7_1(value) synth_pot(3, value) end
+function pot_8_1(value) synth_pot(4, value) end
 
 function send_note(on_off, chan, note, velo)
     if on_off == 1 then
