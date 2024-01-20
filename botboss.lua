@@ -3,6 +3,7 @@ print("BotBoss Lua definitions")
 -- state variables
 local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
+BPM = 60  -- global for access from midichief.c
 local click_press = 0  -- to implement long press
 local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
@@ -52,6 +53,7 @@ function LED(where, color)
 end
 
 function click()
+    print("BPM=", BPM)
     if click_mode == 0 then
         return
     end
@@ -262,6 +264,21 @@ function pad_07_1(on_off) synth_pad("07", on_off) end
 function pad_13_1(on_off) synth_pad("13", on_off) end
 function pad_14_1(on_off) synth_pad("14", on_off) end
 function pad_15_1(on_off) synth_pad("15", on_off) end
+
+function pot_5_0(value)
+    -- f(x) = ax^2 + bx + c
+    -- f'(x) = 2ax + b
+    -- f(0) = 10  =>  c = 10
+    -- f'(0) = 1  =>  b = 1
+    -- f(127) = 250  =>  16129a + 127*1 + 10 = 250  => a = 113/16129 ~ 0.007
+    local bpm = 0.007*value^2 + value + 10
+    local int, part = math.modf(bpm)
+    if part > .5 then
+        BPM = int+1
+    else
+        BPM = int
+    end
+end
 
 function synth_pot(pot, value)
     param = CC_map[synth_page][pot]
