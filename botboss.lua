@@ -49,7 +49,8 @@ LED_map["pad_15"] = 118
 LED_map["pad_16"] = 119
 
 function LED(where, color)
-    note_on(CHAN_LK, LED_map[where], color)
+    note_off(CHAN_LK, LED_map[where], color)
+    note_on( CHAN_LK, LED_map[where], color)
 end
 
 function click()
