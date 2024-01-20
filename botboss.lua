@@ -47,6 +47,8 @@ LED_map["pad_13"] = 116
 LED_map["pad_14"] = 117
 LED_map["pad_15"] = 118
 LED_map["pad_16"] = 119
+-- pad numbers for binary display of BPM
+local PADS_click = {"12", "11", "10", "09", "04", "03", "02", "01"}
 
 function LED(where, color)
     note_off(CHAN_LK, LED_map[where], color)
@@ -100,6 +102,7 @@ function update_LEDs()
             LED("pad_16", BLACK)
         end
         LED("pad_05", click_colors[click_mode + 1])
+        update_LEDs_BPM()
     elseif page == 1 then
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
@@ -115,6 +118,24 @@ function update_LEDs()
     else
         LED("play_up", RED)
         LED("play_down", RED)
+    end
+end
+
+function update_LEDs_BPM()
+    -- BPM from 10 to 250, so only 8 bits are necessary
+    local n = BPM
+    local t = {0, 0, 0, 0, 0, 0, 0, 0}
+    for i = 1, 8 do
+        r = n % 2
+        t[i] = r
+        n = (n-r) / 2
+    end
+    for i,b in ipairs(t) do
+        if b > 0 then
+            LED("pad_"..PADS_click[i], YELLOW)
+        else
+            LED("pad_"..PADS_click[i], BLACK)
+        end
     end
 end
 
@@ -255,6 +276,7 @@ function pad_14_1(on_off) synth_pad("14", on_off) end
 function pad_15_1(on_off) synth_pad("15", on_off) end
 
 function pot_5_0(value)
+    local old_BPM = BPM
     -- f(x) = ax^2 + bx + c
     -- f'(x) = 2ax + b
     -- f(0) = 10  =>  c = 10
@@ -266,6 +288,9 @@ function pot_5_0(value)
         BPM = int+1
     else
         BPM = int
+    end
+    if BPM ~= old_BPM then
+        update_LEDs_BPM()
     end
 end
 
