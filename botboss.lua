@@ -4,6 +4,7 @@ print("BotBoss Lua definitions")
 local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
 BPM = 60  -- global for access from midichief.c
+local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_press = 0  -- to implement long press
 local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
@@ -49,6 +50,29 @@ LED_map["pad_15"] = 118
 LED_map["pad_16"] = 119
 -- pad numbers for binary display of BPM
 local PADS_click = {"12", "11", "10", "09", "04", "03", "02", "01"}
+-- modifiers for binary pads
+local PADS_click_bit_num = {}
+PADS_click_bit_num["01"] = 8
+PADS_click_bit_num["02"] = 7
+PADS_click_bit_num["03"] = 6
+PADS_click_bit_num["04"] = 5
+PADS_click_bit_num["09"] = 4
+PADS_click_bit_num["10"] = 3
+PADS_click_bit_num["11"] = 2
+PADS_click_bit_num["12"] = 1
+local PADS_click_modif = {}
+PADS_click_modif["01"] = 128
+PADS_click_modif["02"] =  64
+PADS_click_modif["03"] =  32
+PADS_click_modif["04"] =  16
+PADS_click_modif["09"] =   8
+PADS_click_modif["10"] =   4
+PADS_click_modif["11"] =   2
+PADS_click_modif["12"] =   1
+PADS_click_modif["13"] =  -1
+PADS_click_modif["14"] =  -5
+PADS_click_modif["15"] =   5
+PADS_click_modif["16"] =   1
 
 function LED(where, color)
     note_off(CHAN_LK, LED_map[where], color)
@@ -120,15 +144,7 @@ function update_LEDs()
 end
 
 function update_LEDs_BPM()
-    -- BPM from 10 to 250, so only 8 bits are necessary
-    local n = BPM
-    local t = {0, 0, 0, 0, 0, 0, 0, 0}
-    for i = 1, 8 do
-        r = n % 2
-        t[i] = r
-        n = (n-r) / 2
-    end
-    for i,b in ipairs(t) do
+    for i,b in ipairs(BPM_bits) do
         if b > 0 then
             LED("pad_"..PADS_click[i], YELLOW)
         else
@@ -231,6 +247,79 @@ function pad_05_0(on_off)
     end
 end
 
+function click_bin_modif(pad)
+    local bit_num = PADS_click_bit_num[pad]
+    local modif = PADS_click_modif[pad]
+    if BPM_bits[bit_num] > 0 then
+        BPM = BPM - modif
+        BPM_bits[bit_num] = 0
+    else
+        BPM = BPM + modif
+        BPM_bits[bit_num] = 1
+    end
+    update_LEDs_BPM()
+end
+
+function pad_01_0(on_off) if on_off == 0 then click_bin_modif("01") end end
+function pad_02_0(on_off) if on_off == 0 then click_bin_modif("02") end end
+function pad_03_0(on_off) if on_off == 0 then click_bin_modif("03") end end
+function pad_04_0(on_off) if on_off == 0 then click_bin_modif("04") end end
+function pad_09_0(on_off) if on_off == 0 then click_bin_modif("09") end end
+function pad_10_0(on_off) if on_off == 0 then click_bin_modif("10") end end
+function pad_11_0(on_off) if on_off == 0 then click_bin_modif("11") end end
+function pad_12_0(on_off) if on_off == 0 then click_bin_modif("12") end end
+
+function pad_06_0(on_off)
+    -- half time
+    if on_off == 1 then
+        LED("pad_06", YELLOW)
+    else
+        LED("pad_06", BLACK)
+        if BPM % 2 == 0 then
+            local bpm = BPM_int(BPM/2)
+            if bpm >= 10 then
+                BPM = bpm
+                BPM_bits = bits(BPM)
+                update_LEDs_BPM()
+            end
+        end
+    end
+end
+
+function pad_07_0(on_off)
+    -- double time
+    if on_off == 1 then
+        LED("pad_07", YELLOW)
+    else
+        LED("pad_07", BLACK)
+        local bpm = BPM_int(BPM*2)
+        if bpm <= 250 then
+            BPM = bpm
+            BPM_bits = bits(BPM)
+            update_LEDs_BPM()
+        end
+    end
+end
+
+function increment(pad, on_off)
+    if on_off == 1 then
+        LED("pad_"..pad, YELLOW)
+    else
+        LED("pad_"..pad, BLACK)
+        local bpm = BPM + PADS_click_modif[pad]
+        if 10 <= bpm and bpm <= 250 then
+            BPM = bpm
+            BPM_bits = bits(BPM)
+            update_LEDs_BPM()
+        end
+    end
+end
+
+function pad_13_0(on_off) increment("13", on_off) end
+function pad_14_0(on_off) increment("14", on_off) end
+function pad_15_0(on_off) increment("15", on_off) end
+function pad_16_0(on_off) increment("16", on_off) end
+
 function pad_01_1(on_off)
     -- reload or halt
     if on_off == 1 then
@@ -273,6 +362,27 @@ function pad_13_1(on_off) synth_pad("13", on_off) end
 function pad_14_1(on_off) synth_pad("14", on_off) end
 function pad_15_1(on_off) synth_pad("15", on_off) end
 
+function bits(n)
+    -- BPM from 10 to 250, so only 8 bits are necessary
+    local n = BPM
+    local t = {0, 0, 0, 0, 0, 0, 0, 0}
+    for i = 1, 8 do
+        r = n % 2
+        t[i] = r
+        n = (n-r) / 2
+    end
+    return t
+end
+
+function BPM_int(bpm)
+    local int, part = math.modf(bpm)
+    if part > .5 then
+        return int+1
+    else
+        return int
+    end
+end
+
 function pot_5_0(value)
     local old_BPM = BPM
     -- f(x) = ax^2 + bx + c
@@ -280,14 +390,10 @@ function pot_5_0(value)
     -- f(0) = 10  =>  c = 10
     -- f'(0) = 1  =>  b = 1
     -- f(127) = 250  =>  16129a + 127*1 + 10 = 250  => a = 113/16129 ~ 0.007
-    local bpm = 0.007*value^2 + value + 10
-    local int, part = math.modf(bpm)
-    if part > .5 then
-        BPM = int+1
-    else
-        BPM = int
-    end
-    if BPM ~= old_BPM then
+    local bpm = BPM_int(0.007*value^2 + value + 10)
+    if bpm ~= old_BPM then
+        BPM = bpm
+        BPM_bits = bits(BPM)
         update_LEDs_BPM()
     end
 end
