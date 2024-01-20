@@ -96,10 +96,8 @@ function update_LEDs()
         -- click
         if click_lit then
             LED("pad_08", YELLOW)
-            LED("pad_16", YELLOW)
         else
             LED("pad_08", BLACK)
-            LED("pad_16", BLACK)
         end
         LED("pad_05", click_colors[click_mode + 1])
         update_LEDs_BPM()
