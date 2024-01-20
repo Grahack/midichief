@@ -93,23 +93,11 @@ function update_LEDs()
         LED("play_down", YELLOW)
         -- click
         if click_lit then
-            LED("pad_01", YELLOW)
-            LED("pad_02", YELLOW)
-            LED("pad_03", YELLOW)
-            LED("pad_04", YELLOW)
-            LED("pad_09", YELLOW)
-            LED("pad_10", YELLOW)
-            LED("pad_11", YELLOW)
-            LED("pad_12", YELLOW)
+            LED("pad_08", YELLOW)
+            LED("pad_16", YELLOW)
         else
-            LED("pad_01", BLACK)
-            LED("pad_02", BLACK)
-            LED("pad_03", BLACK)
-            LED("pad_04", BLACK)
-            LED("pad_09", BLACK)
-            LED("pad_10", BLACK)
-            LED("pad_11", BLACK)
-            LED("pad_12", BLACK)
+            LED("pad_08", BLACK)
+            LED("pad_16", BLACK)
         end
         LED("pad_05", click_colors[click_mode + 1])
     elseif page == 1 then
