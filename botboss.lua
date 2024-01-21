@@ -423,13 +423,13 @@ function handle_note(on_off, chan, note, velo)
         -- these notes are for the NTS and are meant to be bass notes
         -- except for the highest on the keyboard: drum sounds
         if note == 70 then      -- HH
-            send_note(on_off, CHAN_drums, 42, velo);
+            send_note(on_off, CHAN_drums, NOTE_HH,   velo);
         elseif note == 68 then  -- kick
-            send_note(on_off, CHAN_drums, 36, velo);
+            send_note(on_off, CHAN_drums, NOTE_KICK, velo);
         elseif note == 72 then  -- snare
-            send_note(on_off, CHAN_drums, 40, velo);
+            send_note(on_off, CHAN_drums, NOTE_SN,   velo);
         elseif note == 71 then  -- open HH
-            send_note(on_off, CHAN_drums, 46, velo);
+            send_note(on_off, CHAN_drums, NOTE_O_HH, velo);
         else
             send_note(on_off, chan, note-24, velo);
         end
