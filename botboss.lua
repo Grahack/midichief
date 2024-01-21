@@ -3,6 +3,8 @@ print("BotBoss Lua definitions")
 -- state variables
 local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
+local drums_mode = false     -- drums on higher notes of the kbd?
+local parakick_mode = false  -- parallel kick on bass notes?
 BPM = 60  -- global for access from midichief.c
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_press = 0  -- to implement long press
@@ -129,8 +131,16 @@ function update_LEDs()
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
         LED("pad_01", GREEN)
-        LED("pad_02", BLACK)
-        LED("pad_03", BLACK)
+        if drums_mode then
+            LED("pad_02", GREEN)
+        else
+            LED("pad_02", RED)
+        end
+        if parakick_mode then
+            LED("pad_03", GREEN)
+        else
+            LED("pad_03", RED)
+        end
         LED("pad_04", BLACK)
         LED("pad_05", BLACK)
         LED("pad_09", BLACK)
@@ -342,6 +352,26 @@ function pad_01_1(on_off)
     end
 end
 
+function pad_02_1(on_off)
+    -- drums high on the keyboard?
+    if on_off == 1 then
+        LED("pad_02", YELLOW)
+    else
+        drums_mode = not drums_mode
+        update_LEDs()
+    end
+end
+
+function pad_03_1(on_off)
+    -- parallel kick for bass notes?
+    if on_off == 1 then
+        LED("pad_03", YELLOW)
+    else
+        parakick_mode = not parakick_mode
+        update_LEDs()
+    end
+end
+
 function synth_pad(pad, on_off)
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
@@ -422,16 +452,26 @@ function handle_note(on_off, chan, note, velo)
         -- chan 1(2) is from the Launchkey in normal mode, or the keys
         -- these notes are for the NTS and are meant to be bass notes
         -- except for the highest on the keyboard: drum sounds
-        if note == 70 then      -- HH
-            send_note(on_off, CHAN_drums, NOTE_HH,   velo);
-        elseif note == 68 then  -- kick
-            send_note(on_off, CHAN_drums, NOTE_KICK, velo);
-        elseif note == 72 then  -- snare
-            send_note(on_off, CHAN_drums, NOTE_SN,   velo);
-        elseif note == 71 then  -- open HH
-            send_note(on_off, CHAN_drums, NOTE_O_HH, velo);
+        if drums_mode then
+            if note == 70 then      -- HH
+                send_note(on_off, CHAN_drums, NOTE_HH,   velo);
+            elseif note == 68 then  -- kick
+                send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+            elseif note == 72 then  -- snare
+                send_note(on_off, CHAN_drums, NOTE_SN,   velo);
+            elseif note == 71 then  -- open HH
+                send_note(on_off, CHAN_drums, NOTE_O_HH, velo);
+            else
+                send_note(on_off, chan, note-24, velo);
+                if parakick_mode then
+                    send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+                end
+            end
         else
             send_note(on_off, chan, note-24, velo);
+            if parakick_mode then
+                send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+            end
         end
     elseif chan == 0 then
         -- chan 0(1) is from the Launchkey in InControl mode
