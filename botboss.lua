@@ -142,7 +142,6 @@ function update_LEDs()
             LED("pad_03", RED)
         end
         LED("pad_04", BLACK)
-        LED("pad_05", BLACK)
         LED("pad_09", BLACK)
         LED("pad_10", BLACK)
         LED("pad_11", BLACK)
