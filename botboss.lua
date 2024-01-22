@@ -13,7 +13,7 @@ local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
 local click_note  = 42  -- HH by default
 local click_lit   = false  -- to implement alternating LEDs
 local synth_page  = "05"  -- OSC (pad numbers)
--- OSC = 1   EG = 6   REV = 7   FILT = 13   MOD = 14   DELAY = 15
+-- OSC = 05   EG = 06   REV = 07   FILT = 13   MOD = 14   DELAY = 15
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
