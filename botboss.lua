@@ -552,7 +552,7 @@ function panic()
     for n = 0, 127 do
         note_off(0, n, 127);
     end
-    -- note off events  blackens LEDs so we have to update everything
+    -- note off events blacken LEDs so we have to update everything
     update_LEDs()
 end
 
