@@ -124,7 +124,7 @@ function click()
     if click_mode == 2 or click_mode == 3 then
         click_lit = not click_lit
         if page == 0 then
-            update_LEDs()
+            update_LEDs_visual_BPM()
         end
     end
 end
@@ -144,17 +144,20 @@ function play_down_1(on_off)
     end
 end
 
+function update_LEDs_visual_BPM()
+    if click_lit then
+        LED("pad_08", YELLOW)
+    else
+        LED("pad_08", BLACK)
+    end
+end
+
 function update_LEDs()
     if page == 0 then
         LED("play_up", BLACK)
         LED("play_down", YELLOW)
-        -- click
-        if click_lit then
-            LED("pad_08", YELLOW)
-        else
-            LED("pad_08", BLACK)
-        end
         LED("pad_05", click_colors[click_mode + 1])
+        update_LEDs_visual_BPM()
         update_LEDs_BPM()
     elseif page == 1 then
         LED("play_up", YELLOW)
