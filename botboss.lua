@@ -465,8 +465,7 @@ end
 
 function bits4(n)
     -- Built-in synth types of the NTS are 5, 6 or 7
-    -- but maybe more when I can load some more...
-    -- Any way 16 should be enough
+    -- Max supported is 16
     local t = {0, 0, 0, 0}
     for i = 1, 4 do
         r = n % 2
