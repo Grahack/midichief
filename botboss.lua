@@ -308,7 +308,7 @@ function pad_06_0(on_off)
             local bpm = BPM_int(BPM/2)
             if bpm >= 10 then
                 BPM = bpm
-                BPM_bits = bits(BPM)
+                BPM_bits = bits8(BPM)
                 update_LEDs_BPM()
             end
         end
@@ -324,7 +324,7 @@ function pad_07_0(on_off)
         local bpm = BPM_int(BPM*2)
         if bpm <= 250 then
             BPM = bpm
-            BPM_bits = bits(BPM)
+            BPM_bits = bits8(BPM)
             update_LEDs_BPM()
         end
     end
@@ -338,7 +338,7 @@ function increment(pad, on_off)
         local bpm = BPM + PADS_click_modif[pad]
         if 10 <= bpm and bpm <= 250 then
             BPM = bpm
-            BPM_bits = bits(BPM)
+            BPM_bits = bits8(BPM)
             update_LEDs_BPM()
         end
     end
@@ -446,7 +446,7 @@ function scene_down_1(value)
     end
 end
 
-function bits(n)
+function bits8(n)
     -- BPM from 10 to 250, so only 8 bits are necessary
     local t = {0, 0, 0, 0, 0, 0, 0, 0}
     for i = 1, 8 do
@@ -476,7 +476,7 @@ function pot_5_0(value)
     local bpm = BPM_int(0.007*value^2 + value + 10)
     if bpm ~= old_BPM then
         BPM = bpm
-        BPM_bits = bits(BPM)
+        BPM_bits = bits8(BPM)
         update_LEDs_BPM()
     end
 end
