@@ -12,8 +12,13 @@ local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
 local click_note  = 42  -- HH by default
 local click_lit   = false  -- to implement alternating LEDs
-local synth_page  = "05"  -- OSC (pad numbers)
--- OSC = 05   EG = 06   REV = 07   FILT = 13   MOD = 14   DELAY = 15
+local synth_cur_line = 1     -- 1 is OSC FILT EG / 2 is MOD DELAY REV
+                             -- used as the key of this next table
+local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
+-- line .. "_" .. pad will be used as a key for this next table
+local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
+                        ["2_05"] = 1, ["2_06"] = 1, ["2_07"] = 1}
+-- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -33,6 +38,30 @@ local APPLE = 49
 local ORANGE = 19
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 
+--     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
+-- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
+-- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
+-- A+  FREQ LFO 24  FREQ cs  46  FREQ t  21     X           X         X
+-- B+  DEPTH    26  DEPTH cs 45  DEPTH t 20     X        MIX   33  MIX   36
+--     pitch/shape  cutoff sweep trem
+
+local CC_map = {}
+CC_map["1_05"] = {54, 55, 24, 26} -- OSC
+CC_map["1_06"] = {43, 44, 46, 45} -- FILT
+CC_map["1_07"] = {16, 19, 21, 20} -- EG
+CC_map["2_05"] = {28, 29, DUMMY_CC, DUMMY_CC} -- MOD
+CC_map["2_06"] = {30, 31, DUMMY_CC, 33}       -- DELAY
+CC_map["2_07"] = {34, 35, DUMMY_CC, 36}       -- REV
+local CC_map_type_param = {["1_05"] = 53, ["1_06"] = 42, ["1_07"] = 14,
+                           ["2_05"] = 88, ["2_06"] = 89, ["2_07"] = 90}
+local CC_map_type_value = {}
+CC_map_type_value[5] = {0,25,50,75,127}
+CC_map_type_value[6] = {0,21,42,63,84,127}
+CC_map_type_value[7] = {0,18,36,54,72,90,127}
+local synth_max_type = {["1_05"] = 5, ["1_06"] = 7, ["1_07"] = 5,
+                        ["2_05"] = 5, ["2_06"] = 6, ["2_07"] = 6}
+
+-- display constants
 local LED_map = {}
 LED_map["play_up"]   = 104
 LED_map["play_down"] = 120
@@ -104,7 +133,6 @@ function play_up_0(on_off)
     if on_off == 0 then  -- on release
         page = 1
         update_LEDs()
-        LED("pad_"..synth_page, GREEN)
     end
 end
 
@@ -113,7 +141,6 @@ function play_down_1(on_off)
     if on_off == 0 then  -- on release
         page = 0
         update_LEDs()
-        LED("pad_"..synth_page, BLACK)
     end
 end
 
@@ -148,6 +175,7 @@ function update_LEDs()
         LED("pad_10", BLACK)
         LED("pad_11", BLACK)
         LED("pad_12", BLACK)
+        update_LEDs_synth()
     else
         LED("play_up", RED)
         LED("play_down", RED)
@@ -161,6 +189,18 @@ function update_LEDs_BPM()
         else
             LED("pad_"..PADS_click[i], BLACK)
         end
+    end
+end
+
+function update_LEDs_synth()
+    LED("pad_05", BLACK)
+    LED("pad_06", BLACK)
+    LED("pad_07", BLACK)
+    LED("pad_"..synth_cur_pad[synth_cur_line], GREEN)
+    if synth_cur_line == 1 then
+        LED("pad_08", APPLE)
+    else
+        LED("pad_08", ORANGE)
     end
 end
 
@@ -213,31 +253,6 @@ n_fns[120] = "play_down"
 
 cc_fns[104] = "scene_up"
 cc_fns[105] = "scene_down"
-
---     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
--- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
--- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
--- A+  FREQ LFO 24  FREQ cs  46  FREQ t  21     X           X         X
--- B+  DEPTH    26  DEPTH cs 45  DEPTH t 20     X        MIX   33  MIX   36
---     pitch/shape  cutoff sweep trem
-
-local CC_map = {}
--- OSC
-CC_map["05"] = {54, 55, 24, 26}
-CC_map["05"][0] = 53  -- a faire circuler!!!!!!!!!!!!!
--- FILT
-CC_map["13"] = {43, 44, 46, 45}
-CC_map["13"][0] = 42  -- !!!!!!!!!!!!
--- EG
-CC_map["06"] = {16, 19, 21, 20}
--- MOD
-CC_map["14"] = {28, 29, DUMMY_CC, DUMMY_CC}
-   -- 88  -- circuler !!!!!!!!!!!!!!
--- DELAY
-CC_map["15"] = {30, 31, DUMMY_CC, 33}
--- REV
-CC_map["07"] = {34, 35, DUMMY_CC, 36}
---  90  -- circuler
 
 function pad_05_0(on_off)
     -- click edit
@@ -377,21 +392,56 @@ function synth_pad(pad, on_off)
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
     else
-        -- switch off old pad
-        LED("pad_"..synth_page, BLACK)
-        -- update current page and light the new pad
-        synth_page = pad
-        LED("pad_"..synth_page, GREEN)
+        local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+        synth_cur_pad[synth_cur_line] = pad
+        update_LEDs_synth()
     end
 end
 
--- handling pads for OSC EG REV FILT MOD DELAY
+-- handling pads for synth control
 function pad_05_1(on_off) synth_pad("05", on_off) end
 function pad_06_1(on_off) synth_pad("06", on_off) end
 function pad_07_1(on_off) synth_pad("07", on_off) end
-function pad_13_1(on_off) synth_pad("13", on_off) end
-function pad_14_1(on_off) synth_pad("14", on_off) end
-function pad_15_1(on_off) synth_pad("15", on_off) end
+
+function pad_08_1(on_off)
+    if on_off == 1 then
+        LED("pad_08", YELLOW)
+    else
+        synth_cur_line = synth_cur_line % 2 + 1  -- switch line
+        update_LEDs_synth()
+    end
+end
+
+function send_synth_type()
+    local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+    local num_type = synth_cur_type[key]
+    local max_type = synth_max_type[key]
+    local param = CC_map_type_param[key]
+    local value = CC_map_type_value[max_type][num_type]
+    cc(CHAN_NTS, param, value)
+end
+
+function scene_up_1(value)
+    if value == 0 then  -- release
+        local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+        local old = synth_cur_type[key]
+        if old < synth_max_type[key] then
+            synth_cur_type[key] = old + 1
+            send_synth_type()
+        end
+    end
+end
+
+function scene_down_1(value)
+    if value == 0 then  -- release
+        local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+        local old = synth_cur_type[key]
+        if old > 1 then
+            synth_cur_type[key] = old - 1
+            send_synth_type()
+        end
+    end
+end
 
 function bits(n)
     -- BPM from 10 to 250, so only 8 bits are necessary
@@ -430,7 +480,8 @@ function pot_5_0(value)
 end
 
 function synth_pot(pot, value)
-    param = CC_map[synth_page][pot]
+    local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+    param = CC_map[key][pot]
     cc(CHAN_NTS, param, value)
 end
 
