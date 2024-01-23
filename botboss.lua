@@ -634,6 +634,24 @@ function panic()
     for n = 0, 127 do
         note_off(0, n, 127);
     end
+    -- put synth types to first entry
+    for _, param in pairs(CC_map_type_param) do
+        cc(CHAN_NTS, param, 0)
+    end
+    -- pots to max, zero or center
+    for _, t in pairs(CC_map) do
+        for _, param in pairs(t) do
+            if param == 43 then                   -- FILT A   to max
+                cc(CHAN_NTS, param, 127)
+            elseif param == 46 or param == 45 or  -- FILT A+ B+
+                   param == 26 or                  -- OSC  B+
+                   param == 33 or param == 36 then   -- DELAY REV B+
+                cc(CHAN_NTS, param, 63)               -- to center
+            else
+                cc(CHAN_NTS, param, 0)            -- rest to zero
+            end
+        end
+    end
     -- note off events blacken LEDs so we have to update everything
     update_LEDs()
 end
