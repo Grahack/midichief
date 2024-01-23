@@ -106,6 +106,8 @@ PADS_click_modif["13"] =  -1
 PADS_click_modif["14"] =  -5
 PADS_click_modif["15"] =   5
 PADS_click_modif["16"] =   1
+-- pad numbers for binary display of synth types
+local PADS_synth = {"16", "15", "14", "13"}
 
 function LED(where, color)
     note_off(CHAN_LK, LED_map[where], color)
@@ -195,6 +197,18 @@ function update_LEDs_BPM()
     end
 end
 
+function update_LEDs_synth_type()
+    local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
+    local num_type = synth_cur_type[key]
+    for i,b in ipairs(bits4(num_type)) do
+        if b > 0 then
+            LED("pad_"..PADS_synth[i], YELLOW)
+        else
+            LED("pad_"..PADS_synth[i], BLACK)
+        end
+    end
+end
+
 function update_LEDs_synth()
     LED("pad_05", BLACK)
     LED("pad_06", BLACK)
@@ -205,6 +219,7 @@ function update_LEDs_synth()
     else
         LED("pad_08", ORANGE)
     end
+    update_LEDs_synth_type()
 end
 
 -- Used to play melodies
@@ -431,6 +446,7 @@ function scene_up_1(value)
         if old < synth_max_type[key] then
             synth_cur_type[key] = old + 1
             send_synth_type()
+            update_LEDs_synth_type()
         end
     end
 end
@@ -442,8 +458,22 @@ function scene_down_1(value)
         if old > 1 then
             synth_cur_type[key] = old - 1
             send_synth_type()
+            update_LEDs_synth_type()
         end
     end
+end
+
+function bits4(n)
+    -- Built-in synth types of the NTS are 5, 6 or 7
+    -- but maybe more when I can load some more...
+    -- Any way 16 should be enough
+    local t = {0, 0, 0, 0}
+    for i = 1, 4 do
+        r = n % 2
+        t[i] = r
+        n = (n-r) / 2
+    end
+    return t
 end
 
 function bits8(n)
