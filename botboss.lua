@@ -188,7 +188,7 @@ function update_LEDs()
 end
 
 function update_LEDs_BPM()
-    for i,b in ipairs(BPM_bits) do
+    for i, b in ipairs(BPM_bits) do
         if b > 0 then
             LED("pad_"..PADS_click[i], YELLOW)
         else
@@ -200,7 +200,7 @@ end
 function update_LEDs_synth_type()
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
     local num_type = synth_cur_type[key]
-    for i,b in ipairs(bits4(num_type)) do
+    for i, b in ipairs(bits4(num_type)) do
         if b > 0 then
             LED("pad_"..PADS_synth[i], YELLOW)
         else
