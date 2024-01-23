@@ -29,6 +29,8 @@ local BLACK = 0
 local RED = 1
 local YELLOW = 17
 local GREEN = 16
+local APPLE = 49
+local ORANGE = 19
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 
 local LED_map = {}
