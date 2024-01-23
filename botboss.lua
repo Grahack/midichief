@@ -445,7 +445,6 @@ end
 
 function bits(n)
     -- BPM from 10 to 250, so only 8 bits are necessary
-    local n = BPM
     local t = {0, 0, 0, 0, 0, 0, 0, 0}
     for i = 1, 8 do
         r = n % 2
