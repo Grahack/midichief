@@ -190,7 +190,7 @@ end
 function update_LEDs_BPM()
     for i, b in ipairs(BPM_bits) do
         if b > 0 then
-            LED("pad_"..PADS_click[i], YELLOW)
+            LED("pad_"..PADS_click[i], APPLE)
         else
             LED("pad_"..PADS_click[i], BLACK)
         end
