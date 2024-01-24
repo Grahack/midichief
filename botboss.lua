@@ -148,7 +148,7 @@ end
 
 function update_LEDs_visual_BPM()
     if click_lit then
-        LED("pad_08", YELLOW)
+        LED("pad_08", APPLE)
     else
         LED("pad_08", BLACK)
     end
