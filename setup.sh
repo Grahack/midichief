@@ -1,6 +1,7 @@
 #!/bin/bash
 BB_DIR=/home/chri/botboss
 MC_DIR=$BB_DIR/midichief
+SM=$BB_DIR/divs-midi-utilities/bin/sendmidi
 LOG=$MC_DIR/midichief.log
 
 log() {
@@ -25,5 +26,5 @@ connect_ALSA "Launchkey":1 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "Launchkey":1
 connect_ALSA "UM-1":0 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "UM-1":0
-$BB_DIR/divs-midi-utilities/bin/sendmidi --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
+$SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
 log "Ready at $(date +%T)"
