@@ -2,6 +2,7 @@
 BB_DIR=/home/chri/botboss
 MC_DIR=$BB_DIR/midichief
 SM=$BB_DIR/divs-midi-utilities/bin/sendmidi
+LS=$BB_DIR/divs-midi-utilities/bin/lsmidiouts
 LOG=$MC_DIR/midichief.log
 FONT=/usr/share/sounds/sf2/FluidR3_GM.sf2
 NUM_SOUNDCARD=$(cat /proc/asound/cards | \
@@ -33,10 +34,11 @@ connect_ALSA "UM-1":0 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "UM-1":0
 connect_ALSA "MIDI Chief":1 "FLUID Synth":0
 # Let's silence Fluidsynth on some channels
-$SM --out "FLUID Synth" --control-change 0 7 0    # chan 0(1) (InControl)
-$SM --out "FLUID Synth" --control-change 1 7 0    # chan 1(2) (NTS)
+FLUID_PORT=$($LS | grep FLUID | cut -d' ' -f3)
+$SM --out $FLUID_PORT --control-change 0 7 0    # chan 0(1) (InControl)
+$SM --out $FLUID_PORT --control-change 1 7 0    # chan 1(2) (NTS)
 # Let's boost Fluidsynth's drums
-$SM --out "FLUID Synth" --control-change 9 7 127
+$SM --out $FLUID_PORT --control-change 9 7 127
 # alert MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
 log "Ready at $(date +%T)"
