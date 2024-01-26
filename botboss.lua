@@ -675,12 +675,13 @@ function panic()
         for _, param in pairs(t) do
             if param == 43 then                   -- FILT A   to max
                 cc(CHAN_NTS, param, 127)
-            elseif param == 46 or param == 45 or  -- FILT A+ B+
-                   param == 26 or                  -- OSC  B+
-                   param == 33 or param == 36 then   -- DELAY REV B+
-                cc(CHAN_NTS, param, 63)               -- to center
+            elseif param == 26 or                 -- OSC B+
+                   param == 46 or param == 45 or   -- FILT A+ B+
+                   param == 33 or param == 36 then  -- DELAY REV B+
+                cc(CHAN_NTS, param, 63)              -- to center
             else
-                cc(CHAN_NTS, param, 0)            -- rest to zero
+                -- rest to zero
+                cc(CHAN_NTS, param, 0)
             end
         end
     end
