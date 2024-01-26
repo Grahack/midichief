@@ -19,6 +19,8 @@ local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
 local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
                         ["2_05"] = 1, ["2_06"] = 1, ["2_07"] = 1}
 -- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
+local pressed = {}  -- to implement long press for synth patches
+local synth_patch = 1
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -37,7 +39,9 @@ local GREEN = 16
 local APPLE = 49
 local ORANGE = 19
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
-
+-- synth
+local patches = {["09"] = 1, ["10"] = 2, ["11"] = 3, ["12"] = 4}
+local pads_patches = {"09", "10", "11", "12"}
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
 -- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
@@ -154,6 +158,14 @@ function update_LEDs_visual_BPM()
     end
 end
 
+function update_LEDs_synth_patch()
+    LED("pad_09", BLACK)
+    LED("pad_10", BLACK)
+    LED("pad_11", BLACK)
+    LED("pad_12", BLACK)
+    LED("pad_"..pads_patches[synth_patch], GREEN)
+end
+
 function update_LEDs()
     if page == 0 then
         LED("play_up", BLACK)
@@ -176,10 +188,7 @@ function update_LEDs()
             LED("pad_03", RED)
         end
         LED("pad_04", BLACK)
-        LED("pad_09", BLACK)
-        LED("pad_10", BLACK)
-        LED("pad_11", BLACK)
-        LED("pad_12", BLACK)
+        update_LEDs_synth_patch()
         update_LEDs_synth()
     else
         LED("play_up", RED)
@@ -515,6 +524,29 @@ function synth_pot(pot, value)
     param = CC_map[key][pot]
     cc(CHAN_NTS, param, value)
 end
+
+function patch(pad, on_off)
+    if on_off == 1 then
+        LED("pad_"..pad, YELLOW)
+        pressed[pad] = os.time()
+    else
+        local release = os.time()
+        if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
+            LED("pad_"..pads_patches[synth_patch], BLACK)
+            LED("pad_"..pad, RED)
+            -- save
+            sleep(500)
+        end
+        synth_patch = patches[pad]
+        pressed[pad] = nil
+        update_LEDs_synth_patch()
+    end
+end
+
+function pad_09_1(on_off) patch("09", on_off) end
+function pad_10_1(on_off) patch("10", on_off) end
+function pad_11_1(on_off) patch("11", on_off) end
+function pad_12_1(on_off) patch("12", on_off) end
 
 -- handling pots for synth params
 function pot_5_1(value) synth_pot(1, value) end
