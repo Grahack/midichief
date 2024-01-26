@@ -4,6 +4,9 @@ MC_DIR=$BB_DIR/midichief
 SM=$BB_DIR/divs-midi-utilities/bin/sendmidi
 LOG=$MC_DIR/midichief.log
 FONT=/usr/share/sounds/sf2/FluidR3_GM.sf2
+NUM_SOUNDCARD=$(cat /proc/asound/cards | \
+                grep "USB-Audio - USB Audio CODEC" | \
+                cut -d' ' -f2)
 
 log() {
     echo $1 >> $LOG 2>&1
@@ -22,7 +25,7 @@ connect_ALSA() {
 
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
-fluidsynth -i --server --audio-driver=alsa -o audio.alsa.device=hw:2 $FONT >> $LOG 2>&1 &
+fluidsynth -i --server --audio-driver=alsa -o audio.alsa.device=hw:$NUM_SOUNDCARD $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
 connect_ALSA "Launchkey":1 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "Launchkey":1
