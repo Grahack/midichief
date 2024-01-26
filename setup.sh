@@ -29,8 +29,11 @@ connect_ALSA "MIDI Chief":1 "Launchkey":1
 connect_ALSA "UM-1":0 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "UM-1":0
 connect_ALSA "MIDI Chief":1 "FLUID Synth":0
-$SM --out "FLUID Synth" --control-change 1 7 0    # silence chan 1(2)
-$SM --out "FLUID Synth" --control-change 9 7 127  # boost the drums
+# Let's silence Fluidsynth on some channels
+$SM --out "FLUID Synth" --control-change 0 7 0    # chan 0(1) (InControl)
+$SM --out "FLUID Synth" --control-change 1 7 0    # chan 1(2) (NTS)
+# Let's boost Fluidsynth's drums
+$SM --out "FLUID Synth" --control-change 9 7 127
 # alert MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
 log "Ready at $(date +%T)"
