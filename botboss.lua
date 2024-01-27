@@ -667,6 +667,7 @@ function on_pc(chan, val)
 end
 
 function panic()
+    print("PANIC!")
     -- all notes off
     for n = 0, 127 do
         note_off(0, n, 127);
