@@ -669,8 +669,11 @@ end
 function panic()
     print("PANIC!")
     -- all notes off
+    cc(CHAN_NTS, 123, 0)  -- not sure it works...
+    -- manual all notes off
     for n = 0, 127 do
-        note_off(0, n, 127);
+        note_off(CHAN_NTS, n, 127);
+        note_off(CHAN_drums, n, 127);
     end
     -- put synth types to first entry
     for _, param in pairs(CC_map_type_param) do
