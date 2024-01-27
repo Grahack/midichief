@@ -173,6 +173,11 @@ function update_LEDs()
         LED("pad_05", click_colors[click_mode + 1])
         update_LEDs_visual_BPM()
         update_LEDs_BPM()
+        -- blacken synth types LEDs
+        LED("pad_13", BLACK)
+        LED("pad_14", BLACK)
+        LED("pad_15", BLACK)
+        LED("pad_16", BLACK)
     elseif page == 1 then
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
