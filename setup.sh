@@ -26,7 +26,9 @@ connect_ALSA() {
 
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
-fluidsynth -i --server --audio-driver=alsa -o audio.alsa.device=hw:$NUM_SOUNDCARD $FONT >> $LOG 2>&1 &
+fluidsynth -i --server --gain 2 --audio-driver=alsa \
+           -o audio.alsa.device=hw:$NUM_SOUNDCARD \
+           $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
 connect_ALSA "Launchkey":1 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "Launchkey":1
