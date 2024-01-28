@@ -12,6 +12,7 @@ local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
 local click_note  = 42  -- HH by default
 local click_lit   = false  -- to implement alternating LEDs
+-- tweak synth sound
 local synth_cur_line = 1     -- 1 is OSC FILT EG / 2 is MOD DELAY REV
                              -- used as the key of this next table
 local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
@@ -19,6 +20,7 @@ local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
 local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
                         ["2_05"] = 1, ["2_06"] = 1, ["2_07"] = 1}
 -- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
+-- patch handling
 local pressed = {}  -- to implement long press for synth patches
 local synth_patch = 1
 local current_patch = {}  -- TODO  = init_patch()
