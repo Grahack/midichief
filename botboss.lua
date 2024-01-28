@@ -466,26 +466,22 @@ function pad_03_1(on_off)
     end
 end
 
-function serializeTable(val, name, skipnewlines, depth)
+function serializeTable(val, name)
+    -- simplified version of
     -- https://stackoverflow.com/questions/6075262/lua-table-tostringtablename-and-table-fromstringstringtable-functions
-    skipnewlines = skipnewlines or false
-    depth = depth or 0
-    local tmp = string.rep(" ", depth)
+    local tmp = ""
     if name then tmp = tmp .. name .. " = " end
     if type(val) == "table" then
-        tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")
+        tmp = tmp .. "{" .. "\n"
         for k, v in pairs(val) do
-            if type(k) == "number" then k = "[\"" .. tostring(k) .. "\"]" end
-            tmp =  tmp .. serializeTable(v, k, skipnewlines, depth + 1) ..
-                   "," .. (not skipnewlines and "\n" or "")
+            k = "[\"" .. tostring(k) .. "\"]"
+            tmp =  tmp .. serializeTable(v, k) ..  "," .. "\n"
         end
-        tmp = tmp .. string.rep(" ", depth) .. "}"
+        tmp = tmp .. "}"
     elseif type(val) == "number" then
         tmp = tmp .. tostring(val)
     elseif type(val) == "string" then
         tmp = tmp .. string.format("%q", val)
-    elseif type(val) == "boolean" then
-        tmp = tmp .. (val and "true" or "false")
     else
         tmp = tmp .. "\"[inserializeable datatype:" .. type(val) .. "]\""
     end
