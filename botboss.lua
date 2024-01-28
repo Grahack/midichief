@@ -21,6 +21,7 @@ local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
 -- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
 local pressed = {}  -- to implement long press for synth patches
 local synth_patch = 1
+local current_patch = {}  -- TODO  = init_patch()
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -159,10 +160,14 @@ function update_LEDs_visual_BPM()
 end
 
 function update_LEDs_synth_patch()
-    LED("pad_09", BLACK)
-    LED("pad_10", BLACK)
-    LED("pad_11", BLACK)
-    LED("pad_12", BLACK)
+    for _, pad in ipairs({"09", "10", "11", "12"}) do
+        local filename = pad_to_patch_filename(pad)
+        if file_exists(filename) then
+            LED("pad_"..pad, ORANGE)
+        else
+            LED("pad_"..pad, BLACK)
+        end
+    end
     LED("pad_"..pads_patches[synth_patch], GREEN)
 end
 
@@ -420,6 +425,49 @@ function pad_03_1(on_off)
     end
 end
 
+function serializeTable(val, name, skipnewlines, depth)
+    -- https://stackoverflow.com/questions/6075262/lua-table-tostringtablename-and-table-fromstringstringtable-functions
+    skipnewlines = skipnewlines or false
+    depth = depth or 0
+    local tmp = string.rep(" ", depth)
+    if name then tmp = tmp .. name .. " = " end
+    if type(val) == "table" then
+        tmp = tmp .. "{" .. (not skipnewlines and "\n" or "")
+        for k, v in pairs(val) do
+            if type(k) == "number" then k = "[\"" .. tostring(k) .. "\"]" end
+            tmp =  tmp .. serializeTable(v, k, skipnewlines, depth + 1) ..
+                   "," .. (not skipnewlines and "\n" or "")
+        end
+        tmp = tmp .. string.rep(" ", depth) .. "}"
+    elseif type(val) == "number" then
+        tmp = tmp .. tostring(val)
+    elseif type(val) == "string" then
+        tmp = tmp .. string.format("%q", val)
+    elseif type(val) == "boolean" then
+        tmp = tmp .. (val and "true" or "false")
+    else
+        tmp = tmp .. "\"[inserializeable datatype:" .. type(val) .. "]\""
+    end
+    return tmp
+end
+
+function patch_to_MIDI_content(patch)
+    -- just a serialization for now
+    return serializeTable(patch)
+end
+
+function MIDI_content_to_patch(content)
+    -- just a deserialization for now
+    return load("return "..content)()
+end
+
+function send_MIDI_content(content, chan)
+    local patch = load("return "..content)()
+    for param, value in pairs(patch) do
+        cc(chan, param, value)
+    end
+end
+
 function synth_pad(pad, on_off)
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
@@ -451,6 +499,7 @@ function send_synth_type()
     local param = CC_map_type_param[key]
     local value = CC_map_type_value[max_type][num_type]
     cc(CHAN_NTS, param, value)
+    current_patch[param] = value
 end
 
 function scene_up_1(value)
@@ -528,6 +577,11 @@ function synth_pot(pot, value)
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
     param = CC_map[key][pot]
     cc(CHAN_NTS, param, value)
+    current_patch[param] = value
+end
+
+function pad_to_patch_filename(pad)
+    return "pad_"..pad.."_"..page..".btbs"
 end
 
 function patch(pad, on_off)
@@ -536,13 +590,25 @@ function patch(pad, on_off)
         pressed[pad] = os.time()
     else
         local release = os.time()
+        local filename = pad_to_patch_filename(pad)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
             LED("pad_"..pads_patches[synth_patch], BLACK)
             LED("pad_"..pad, RED)
             -- save
-            sleep(500)
+            local content = patch_to_MIDI_content(current_patch)
+            save_content(content, filename)
+            print(filename, "saved!")
+            sleep(200)
+        else
+            -- load
+            local filename = pad_to_patch_filename(pad)
+            if file_exists(filename) then
+                local content = load_content(filename)
+                current_patch = MIDI_content_to_patch(content)
+                send_MIDI_content(content, CHAN_NTS)
+                synth_patch = patches[pad]
+            end
         end
-        synth_patch = patches[pad]
         pressed[pad] = nil
         update_LEDs_synth_patch()
     end
@@ -675,6 +741,7 @@ function panic()
         note_off(CHAN_NTS, n, 127);
         note_off(CHAN_drums, n, 127);
     end
+    -- TODO: this next section will go in the init_patch
     -- put synth types to first entry
     for _, param in pairs(CC_map_type_param) do
         cc(CHAN_NTS, param, 0)
@@ -726,4 +793,31 @@ function melody_up()
     note_on(1, 72, 120)
     sleep(200)
     note_off(1, 72, 120)
+end
+
+function save_content(content, filename)
+    local file, err = io.open(filename, 'w')
+    if file then
+        file:write(content)
+        file:close()
+    else
+        print("error saving content:", err)
+    end
+end
+
+-- https://stackoverflow.com/questions/11201262/how-to-read-data-from-a-file-in-lua
+function file_exists(filename)
+    local f = io.open(filename, "rb")
+    if f then f:close() end
+    return f ~= nil
+end
+
+-- get all lines from a file as a string
+function load_content(filename)
+    if not file_exists(filename) then return "" end
+    local lines = ""
+    for line in io.lines(filename) do
+        lines = lines .. line
+    end
+    return lines
 end
