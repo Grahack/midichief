@@ -185,7 +185,6 @@ function play_up_0(on_off)
 end
 
 function play_down_1(on_off)
-    -- on_off == 0 is button release
     if on_off == 0 then  -- on release
         page = 0
         update_LEDs()
