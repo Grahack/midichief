@@ -22,7 +22,7 @@ local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
 -- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
 -- patch handling
 local pressed = {}  -- to implement long press for synth patches
-local synth_patch = 1
+local synth_patch_pad  = "09"
 local current_patch = {}  -- TODO  = init_patch()
 
 -- CONSTANTS
@@ -43,8 +43,6 @@ local APPLE = 49
 local ORANGE = 19
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 -- synth
-local patches = {["09"] = 1, ["10"] = 2, ["11"] = 3, ["12"] = 4}
-local pads_patches = {"09", "10", "11", "12"}
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
 -- B   ALT      55  RESO     44  RELEASE 19  DEPTH 29    DEPTH 31  DEPTH 35
@@ -170,7 +168,7 @@ function update_LEDs_synth_patch()
             LED("pad_"..pad, BLACK)
         end
     end
-    LED("pad_"..pads_patches[synth_patch], GREEN)
+    LED("pad_"..synth_patch_pad, GREEN)
 end
 
 function update_LEDs()
@@ -594,7 +592,7 @@ function patch(pad, on_off)
         local release = os.time()
         local filename = pad_to_patch_filename(pad)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
-            LED("pad_"..pads_patches[synth_patch], BLACK)
+            LED("pad_"..synth_patch_pad, BLACK)
             LED("pad_"..pad, RED)
             -- save
             local content = patch_to_MIDI_content(current_patch)
@@ -608,7 +606,7 @@ function patch(pad, on_off)
                 local content = load_content(filename)
                 current_patch = MIDI_content_to_patch(content)
                 send_MIDI_content(content, CHAN_NTS)
-                synth_patch = patches[pad]
+                synth_patch_pad = pad
             end
         end
         pressed[pad] = nil
