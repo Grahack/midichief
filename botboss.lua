@@ -22,10 +22,13 @@ local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
 -- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
 -- patch handling
 local pressed = {}  -- to implement long press for synth patches
+-- current patch: pad and page
 local synth_patch_pad  = "09"
+local synth_patch_page = 1
 -- see also current_patch below
 
 -- CONSTANTS
+local FILE_PREFIX = "/home/chri/botboss/midichief/"
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_drums = 9
@@ -184,9 +187,23 @@ function play_up_0(on_off)
     end
 end
 
+function play_up_1(on_off)
+    if on_off == 0 then  -- on release
+        page = 2
+        update_LEDs()
+    end
+end
+
 function play_down_1(on_off)
     if on_off == 0 then  -- on release
         page = 0
+        update_LEDs()
+    end
+end
+
+function play_down_2(on_off)
+    if on_off == 0 then  -- on release
+        page = 1
         update_LEDs()
     end
 end
@@ -200,15 +217,25 @@ function update_LEDs_visual_BPM()
 end
 
 function update_LEDs_synth_patch()
-    for _, pad in ipairs({"09", "10", "11", "12"}) do
-        local filename = pad_to_patch_filename(pad)
+    local pads = {}
+    if page == 1 then
+        pads = {"09", "10", "11", "12"}
+    elseif page == 2 then
+        pads = {"01", "02", "03", "04","05", "06", "07", "08",
+                "09", "10", "11", "12","13", "14", "15", "16"}
+    end
+    for _, pad in ipairs(pads) do
+        local filename = patch_filename(pad, page)
+        -- check synth_patch_page too
         if file_exists(filename) then
             LED("pad_"..pad, ORANGE)
         else
             LED("pad_"..pad, BLACK)
         end
     end
-    LED("pad_"..synth_patch_pad, GREEN)
+    if page == synth_patch_page then
+        LED("pad_"..synth_patch_pad, GREEN)
+    end
 end
 
 function update_LEDs()
@@ -240,6 +267,10 @@ function update_LEDs()
         LED("pad_04", BLACK)
         update_LEDs_synth_patch()
         update_LEDs_synth()
+    elseif page == 2 then
+        LED("play_up", RED)
+        LED("play_down", BLACK)
+        update_LEDs_synth_patch()
     else
         LED("play_up", RED)
         LED("play_down", RED)
@@ -616,8 +647,8 @@ function synth_pot(pot, value)
     current_patch[param] = value
 end
 
-function pad_to_patch_filename(pad)
-    return "pad_"..pad.."_"..page..".btbs"
+function patch_filename(the_pad, the_page)
+    return FILE_PREFIX .. "pad_"..the_pad.."_"..the_page..".btbs"
 end
 
 function patch(pad, on_off)
@@ -626,7 +657,7 @@ function patch(pad, on_off)
         pressed[pad] = os.time()
     else
         local release = os.time()
-        local filename = pad_to_patch_filename(pad)
+        local filename = patch_filename(pad, page)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
             LED("pad_"..synth_patch_pad, BLACK)
             LED("pad_"..pad, RED)
@@ -637,12 +668,12 @@ function patch(pad, on_off)
             sleep(200)
         else
             -- load
-            local filename = pad_to_patch_filename(pad)
             if file_exists(filename) then
                 local content = load_content(filename)
                 current_patch = MIDI_content_to_patch(content)
                 send_MIDI_content(content, CHAN_NTS)
                 synth_patch_pad = pad
+                synth_patch_page = page
             end
         end
         pressed[pad] = nil
@@ -654,6 +685,22 @@ function pad_09_1(on_off) patch("09", on_off) end
 function pad_10_1(on_off) patch("10", on_off) end
 function pad_11_1(on_off) patch("11", on_off) end
 function pad_12_1(on_off) patch("12", on_off) end
+function pad_01_2(on_off) patch("01", on_off) end
+function pad_02_2(on_off) patch("02", on_off) end
+function pad_03_2(on_off) patch("03", on_off) end
+function pad_04_2(on_off) patch("04", on_off) end
+function pad_05_2(on_off) patch("05", on_off) end
+function pad_06_2(on_off) patch("06", on_off) end
+function pad_07_2(on_off) patch("07", on_off) end
+function pad_08_2(on_off) patch("08", on_off) end
+function pad_09_2(on_off) patch("09", on_off) end
+function pad_10_2(on_off) patch("10", on_off) end
+function pad_11_2(on_off) patch("11", on_off) end
+function pad_12_2(on_off) patch("12", on_off) end
+function pad_13_2(on_off) patch("13", on_off) end
+function pad_14_2(on_off) patch("14", on_off) end
+function pad_15_2(on_off) patch("15", on_off) end
+function pad_16_2(on_off) patch("16", on_off) end
 
 -- handling pots for synth params
 function pot_5_1(value) synth_pot(1, value) end
@@ -760,7 +807,7 @@ function on_pc(chan, val)
     if chan == 15 and val == 127 then
         -- startup
         incontrol()
-        update_LEDs()
+        panic()  -- includes update_LEDs()
         melody_up()
     else
         -- forward
