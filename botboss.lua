@@ -23,7 +23,7 @@ local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
 -- patch handling
 local pressed = {}  -- to implement long press for synth patches
 local synth_patch_pad  = "09"
-local current_patch = {}  -- TODO  = init_patch()
+-- see also current_patch below
 
 -- CONSTANTS
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -49,6 +49,47 @@ local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 -- A+  FREQ LFO 24  FREQ cs  46  FREQ t  21     X           X         X
 -- B+  DEPTH    26  DEPTH cs 45  DEPTH t 20     X        MIX   33  MIX   36
 --     pitch/shape  cutoff sweep trem
+
+local INIT_PATCH =
+{[ "53"] =   0, -- OSCILLATOR TYPE (vv=0,25,50,75,127)
+ [ "54"] =   0, -- OSCILLATOR SHAPE (vv=0~127)
+ [ "55"] =   0, -- OSCILLATOR ALT (vv=0~127)
+ [ "24"] =   0, -- OSCILLATOR LFO RATE (vv=0~127)
+ [ "26"] =  63, -- OSCILLATOR LFO DEPTH (vv=0~127)
+ [ "42"] =   0, -- FILTER TYPE (vv=0,18,36,54,72,90,127)
+ [ "43"] = 127, -- FILTER CUTOFF (vv=0~127)
+ [ "44"] =   0, -- FILTER RESONANCE (vv=0~127)
+ [ "46"] =  63, -- FILTER SWEEP RATE (vv=0~127)
+ [ "45"] =  63, -- FILTER SWEEP DEPTH (vv=0~127)
+ [ "14"] =   0, -- EG TYPE (vv=0,25,50,75,127)
+ [ "16"] =   0, -- EG ATTACK (vv=0~127)
+ [ "19"] =   0, -- EG RELEASE (vv=0~127)
+ [ "21"] =   0, -- TREMOLO RATE (vv=0~127)
+ [ "20"] =   0, -- TREMOLO DEPTH (vv=0~127)
+ [ "88"] =   0, -- MOD FX TYPE (vv=0,25,50,75,127)
+ [ "28"] =   0, -- MOD FX TIME (vv=0~127)
+ [ "29"] =   0, -- MOD FX DEPTH (vv=0~127)
+ [ "89"] =   0, -- DELAY FX TYPE (vv=0,21,42,63,84,127)
+ [ "30"] =   0, -- DELAY FX TIME (vv=0~127)
+ [ "31"] =   0, -- DELAY FX DEPTH (vv=0~127)
+ [ "33"] =  63, -- DELAY FX MIX (vv=0~127)
+ [ "90"] =   0, -- REVERB FX TYPE (vv=0,21,42,63,84,127)
+ [ "34"] =   0, -- REVERB FX TIME (vv=0~127)
+ [ "35"] =   0, -- REVERB FX DEPTH (vv=0~127)
+ [ "36"] =  63, -- REVERB FX MIX (vv=0~127)
+ ["117"] =   0, -- ARP PATTERN (vv=0,12,24,36,48,60,72,84,96,127)
+ ["118"] =   0, -- ARP INTERVALS (vv=0,21,42,63,84,127)
+ ["119"] =   0} -- ARP LENGTH (vv=0~127)
+
+function init_patch()
+    local t = {}
+    for param, value in pairs(INIT_PATCH) do
+        t[param] = value
+    end
+    return t
+end
+
+local current_patch = init_patch()
 
 local CC_map = {}
 CC_map["1_05"] = {54, 55, 24, 26} -- OSC
@@ -741,25 +782,9 @@ function panic()
         note_off(CHAN_NTS, n, 127);
         note_off(CHAN_drums, n, 127);
     end
-    -- TODO: this next section will go in the init_patch
-    -- put synth types to first entry
-    for _, param in pairs(CC_map_type_param) do
-        cc(CHAN_NTS, param, 0)
-    end
-    -- pots to max, zero or center
-    for _, t in pairs(CC_map) do
-        for _, param in pairs(t) do
-            if param == 43 then                   -- FILT A   to max
-                cc(CHAN_NTS, param, 127)
-            elseif param == 26 or                 -- OSC B+
-                   param == 46 or param == 45 or   -- FILT A+ B+
-                   param == 33 or param == 36 then  -- DELAY REV B+
-                cc(CHAN_NTS, param, 63)              -- to center
-            else
-                -- rest to zero
-                cc(CHAN_NTS, param, 0)
-            end
-        end
+    -- reset synth params
+    for param, value in pairs(INIT_PATCH) do
+        cc(CHAN_NTS, param, value)
     end
     -- note off events blacken LEDs so we have to update everything
     update_LEDs()
