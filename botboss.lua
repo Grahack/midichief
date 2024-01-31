@@ -548,7 +548,9 @@ end
 function send_MIDI_content(content, chan)
     local patch = load("return "..content)()
     for param, value in pairs(patch) do
-        cc(chan, param, value)
+        if value ~= current_patch[param] then
+            cc(chan, param, value)
+        end
     end
 end
 
@@ -687,8 +689,8 @@ function patch(pad, on_off)
             -- load
             if file_exists(filename) then
                 local content = load_content(filename)
-                current_patch = MIDI_content_to_patch(content)
                 send_MIDI_content(content, CHAN_NTS)
+                current_patch = MIDI_content_to_patch(content)
                 synth_patch_pad = pad
                 synth_patch_page = page
             end
