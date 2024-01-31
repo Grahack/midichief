@@ -499,7 +499,11 @@ function pad_02_1(on_off)
         LED("pad_02", YELLOW)
     else
         drums_mode = not drums_mode
-        update_LEDs()
+        if drums_mode then
+            LED("pad_02", GREEN)
+        else
+            LED("pad_02", RED)
+        end
     end
 end
 
@@ -509,7 +513,11 @@ function pad_03_1(on_off)
         LED("pad_03", YELLOW)
     else
         parakick_mode = not parakick_mode
-        update_LEDs()
+        if parakick_mode then
+            LED("pad_03", GREEN)
+        else
+            LED("pad_03", RED)
+        end
     end
 end
 
