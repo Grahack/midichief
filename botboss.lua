@@ -698,9 +698,25 @@ function patch(pad, on_off)
             if file_exists(filename) then
                 local content = load_content(filename)
                 send_MIDI_content(content, CHAN_NTS)
+                -- update the state: first the current patch
                 current_patch = MIDI_content_to_patch(content)
+                -- then the types of OSC FILT EG MOD DELAY REV
+                for pad, param in pairs(CC_map_type_param) do
+                    -- TODO: fix the mess about CC params
+                    -- sometimes numbers, sometimes strings
+                    local param_as_str = tostring(param)
+                    local value = current_patch[param_as_str]
+                    local max = synth_max_type[pad]
+                    for i, v in ipairs(CC_map_type_value[max]) do
+                        if v == value then
+                            synth_cur_type[pad] = i
+                            break
+                        end
+                    end
+                end
                 synth_patch_pad = pad
                 synth_patch_page = page
+                update_LEDs_synth()
             end
         end
         pressed[pad] = nil
