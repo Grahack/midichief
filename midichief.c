@@ -5,6 +5,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <sys/time.h>
+#include <math.h>
 #include <pthread.h>
 
 static snd_seq_t *seq_handle;
@@ -21,8 +22,12 @@ static int click_defined = 0;
 
 static double BPM = 120;
 // TOD is 'time of day', as is called the function from time.h
+// for the click to wait for the correct amount of time
 struct timeval last_TOD, TOD;
 double elapsed;
+// for the tap tempo
+struct timeval tap_TOD_1, tap_TOD_2;
+double tap_elapsed;
 
 // https://lucasklassmann.com/blog/2019-02-02-embedding-lua-in-c/
 static lua_State *L;
@@ -152,6 +157,21 @@ int pc_for_lua(lua_State *L) {
     int value = luaL_checkinteger(L, 2);
     pc(chan, value);
     return 0; // The number of returned values
+}
+
+int tap_for_lua(lua_State *L) {
+    puts("tap!");
+    gettimeofday(&tap_TOD_2, NULL);
+    tap_elapsed = (tap_TOD_2.tv_sec - tap_TOD_1.tv_sec) * 1000.0;    // s to ms
+    tap_elapsed += (tap_TOD_2.tv_usec - tap_TOD_1.tv_usec) / 1000.0; // us to ms
+    double temp_BPM = 60000/tap_elapsed;
+    if(temp_BPM >= 30 && temp_BPM <= 250) {
+        BPM = (int)(temp_BPM);
+    }
+    tap_TOD_1 = tap_TOD_2;
+    lua_Integer new_BPM = BPM;
+    lua_pushinteger(L, new_BPM);
+    return 1; // The number of returned values
 }
 
 int load_lua_rules() {
@@ -297,6 +317,8 @@ int main(int argc, char *argv[]) {
     lua_setglobal(L, "cc");
     lua_pushcfunction(L, pc_for_lua);
     lua_setglobal(L, "pc");
+    lua_pushcfunction(L, tap_for_lua);
+    lua_setglobal(L, "tap");
     // this is for the emit_click thread
     L2 = lua_newthread(L);
     luaL_openlibs(L2);
@@ -314,8 +336,9 @@ int main(int argc, char *argv[]) {
     pthread_create(&tid1, NULL, read_and_process_midi, (void *)&tid1);
     // a thread (if needed) for a click
     if (click_defined) {
-        // start timer
+        // start timers
         gettimeofday(&last_TOD, NULL);
+        gettimeofday(&tap_TOD_1, NULL);
         pthread_t tid2;
         pthread_create(&tid2, NULL, emit_click, (void *)&tid2);
     }

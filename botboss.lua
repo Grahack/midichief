@@ -455,6 +455,22 @@ function pad_14_0(on_off) increment("14", on_off) end
 function pad_15_0(on_off) increment("15", on_off) end
 function pad_16_0(on_off) increment("16", on_off) end
 
+function pad_08_0(on_off)
+    -- tap tempo
+    if on_off == 1 then
+        LED("pad_08", RED)
+        local old_BPM = BPM
+        BPM = tap()
+        if BPM ~= old_BPM then  -- midichief.c only allows BPM >= 30
+            print("Tapped BPM=", BPM)
+            BPM_bits = bits8(BPM)
+            update_LEDs_BPM()
+        end
+    else
+        LED("pad_08", BLACK)
+    end
+end
+
 function pad_01_1(on_off)
     -- reload or halt
     if on_off == 1 then
