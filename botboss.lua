@@ -159,8 +159,8 @@ PADS_click_modif["16"] =   1
 local PADS_synth = {"16", "15", "14", "13"}
 
 function LED(where, color)
-    note_off(CHAN_LK, LED_map[where], color)
-    note_on( CHAN_LK, LED_map[where], color)
+    note_on_off(0, CHAN_LK, LED_map[where], color)
+    note_on_off(1, CHAN_LK, LED_map[where], color)
 end
 
 function click()
@@ -169,8 +169,8 @@ function click()
         return
     end
     if click_mode == 1 or click_mode == 3 then
-        note_on(CHAN_drums, click_note, 127)
-        note_off(CHAN_drums, click_note, 127)
+        note_on_off(1, CHAN_drums, click_note, 127)
+        note_on_off(0, CHAN_drums, click_note, 127)
     end
     if click_mode == 2 or click_mode == 3 then
         click_lit = not click_lit
@@ -319,7 +319,8 @@ end
 
 function incontrol()
     -- set the Launchkey in its InControl mode
-    note_on(0, 12, 127)  -- 0 for chan 0(1), note 12 and velo 127
+    -- 1 for on, 0 for chan 0(1), note 12 and velo 127
+    note_on_off(1, 0, 12, 127)
 end
 
 -- codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
@@ -708,38 +709,30 @@ function pot_6_1(value) synth_pot(2, value) end
 function pot_7_1(value) synth_pot(3, value) end
 function pot_8_1(value) synth_pot(4, value) end
 
-function send_note(on_off, chan, note, velo)
-    if on_off == 1 then
-        note_on(chan, note, velo)
-    else
-        note_off(chan, note, velo)
-    end
-end
-
-function handle_note(on_off, chan, note, velo)
+function on_note(on_off, chan, note, velo)
     if chan == 1 then
         -- chan 1(2) is from the Launchkey in normal mode, or the keys
         -- these notes are for the NTS and are meant to be bass notes
         -- except for the highest on the keyboard: drum sounds
         if drums_mode then
             if note == 70 then      -- HH
-                send_note(on_off, CHAN_drums, NOTE_HH,   velo);
+                note_on_off(on_off, CHAN_drums, NOTE_HH,   velo);
             elseif note == 68 then  -- kick
-                send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+                note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 72 then  -- snare
-                send_note(on_off, CHAN_drums, NOTE_SN,   velo);
+                note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
             elseif note == 71 then  -- open HH
-                send_note(on_off, CHAN_drums, NOTE_O_HH, velo);
+                note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
             else
-                send_note(on_off, chan, note-24, velo);
+                note_on_off(on_off, chan, note-24, velo);
                 if parakick_mode then
-                    send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+                    note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
                 end
             end
         else
-            send_note(on_off, chan, note-24, velo);
+            note_on_off(on_off, chan, note-24, velo);
             if parakick_mode then
-                send_note(on_off, CHAN_drums, NOTE_KICK, velo);
+                note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             end
         end
     elseif chan == 0 then
@@ -764,25 +757,17 @@ function handle_note(on_off, chan, note, velo)
         -- 26 38 D1  snare
         -- I need to translate snare 26 38 to kick 24 36
         if note == 38 then
-            send_note(on_off, 9, 36, velo);
+            note_on_off(on_off, 9, 36, velo);
         -- and to translate HH 2e 46 to HH 2a 42
         elseif note == 46 then
-            send_note(on_off, 9, 42, velo);
+            note_on_off(on_off, 9, 42, velo);
         else
-            send_note(on_off, chan, note, velo);
+            note_on_off(on_off, chan, note, velo);
         end
     else
         -- forward
-        send_note(on_off, chan, note, velo);
+        note_on_off(on_off, chan, note, velo);
     end
-end
-
-function on_note_on(chan, note, velo)
-    handle_note(1, chan, note, velo)
-end
-
-function on_note_off(chan, note, velo)
-    handle_note(0, chan, note, velo)
 end
 
 function on_cc(chan, param, val)
@@ -821,8 +806,8 @@ function panic()
     cc(CHAN_NTS, 123, 0)  -- not sure it works...
     -- manual all notes off
     for n = 0, 127 do
-        note_off(CHAN_NTS, n, 127);
-        note_off(CHAN_drums, n, 127);
+        note_on_off(0, CHAN_NTS, n, 127);
+        note_on_off(0, CHAN_drums, n, 127);
     end
     -- reset synth params
     for param, value in pairs(INIT_PATCH) do
@@ -833,33 +818,33 @@ function panic()
 end
 
 function melody_down()
-    note_on(CHAN_NTS, 72, 120)
+    note_on_off(1, CHAN_NTS, 72, 120)
     sleep(200)
-    note_off(CHAN_NTS, 72, 120)
-    note_on(CHAN_NTS, 67, 120)
+    note_on_off(0, CHAN_NTS, 72, 120)
+    note_on_off(1, CHAN_NTS, 67, 120)
     sleep(200)
-    note_off(CHAN_NTS, 67, 120)
-    note_on(CHAN_NTS, 64, 120)
+    note_on_off(0, CHAN_NTS, 67, 120)
+    note_on_off(1, CHAN_NTS, 64, 120)
     sleep(200)
-    note_off(CHAN_NTS, 64, 120)
-    note_on(CHAN_NTS, 60, 120)
+    note_on_off(0, CHAN_NTS, 64, 120)
+    note_on_off(1, CHAN_NTS, 60, 120)
     sleep(200)
-    note_off(CHAN_NTS, 60, 120)
+    note_on_off(0, CHAN_NTS, 60, 120)
 end
 
 function melody_up()
-    note_on(1, 60, 120)
+    note_on_off(1, CHAN_NTS,  60, 120)
     sleep(200)
-    note_off(1, 60, 120)
-    note_on(1, 64, 120)
+    note_on_off(0, CHAN_NTS,  60, 120)
+    note_on_off(1, CHAN_NTS,  64, 120)
     sleep(200)
-    note_off(1, 64, 120)
-    note_on(1, 67, 120)
+    note_on_off(0, CHAN_NTS,  64, 120)
+    note_on_off(1, CHAN_NTS,  67, 120)
     sleep(200)
-    note_off(1, 67, 120)
-    note_on(1, 72, 120)
+    note_on_off(0, CHAN_NTS,  67, 120)
+    note_on_off(1, CHAN_NTS,  72, 120)
     sleep(200)
-    note_off(1, 72, 120)
+    note_on_off(0, CHAN_NTS,  72, 120)
 end
 
 function save_content(content, filename)

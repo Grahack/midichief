@@ -14,8 +14,7 @@ static int out_port;
 
 static char *filename;
 
-static int on_note_on_defined = 0;
-static int on_note_off_defined = 0;
+static int on_note_defined = 0;
 static int on_cc_defined = 0;
 static int on_pc_defined = 0;
 static int click_defined = 0;
@@ -79,15 +78,13 @@ int send_event(snd_seq_event_t ev) {
     return 0;
 }
 
-int note_on(int channel, int note, int velocity) {
+int note_on_off(int on_off, int channel, int note, int velocity) {
     snd_seq_event_t ev = new_event();
-    snd_seq_ev_set_noteon(&ev, channel, note, velocity);
-    return send_event(ev);
-}
-
-int note_off(int channel, int note, int velocity) {
-    snd_seq_event_t ev = new_event();
-    snd_seq_ev_set_noteoff(&ev, channel, note, velocity);
+    if (on_off) {
+        snd_seq_ev_set_noteon(&ev, channel, note, velocity);
+    } else {
+        snd_seq_ev_set_noteoff(&ev, channel, note, velocity);
+    }
     return send_event(ev);
 }
 
@@ -116,14 +113,15 @@ int pc(int channel, int value) {
     return send_event(ev);
 }
 
-// All Lua MIDI functions take 2 or 3 integers so we assume 3
-void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
+// All Lua MIDI functions take 2, 3 or 4 integers so we assume 4
+void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3, int arg4) {
     lua_getglobal(L, fn_name);
     if (lua_isfunction(L, -1)) printf("Call Lua fn: %s\n", fn_name);
     lua_pushinteger(L, arg1);
     lua_pushinteger(L, arg2);
     lua_pushinteger(L, arg3);
-    if (lua_pcall(L, 3, 1, 0) == LUA_OK) {
+    lua_pushinteger(L, arg4);
+    if (lua_pcall(L, 4, 1, 0) == LUA_OK) {
         lua_pop(L, lua_gettop(L));
     } else {
         printf("Error in Lua function %s:\n", fn_name);
@@ -132,19 +130,12 @@ void call_lua_fn(char fn_name[], int arg1, int arg2, int arg3) {
     }
 }
 
-int note_on_for_lua(lua_State *L) {
-    int chan = luaL_checkinteger(L, 1);
-    int note = luaL_checkinteger(L, 2);
-    int velo = luaL_checkinteger(L, 3);
-    note_on(chan, note, velo);
-    return 0; // The number of returned values
-}
-
-int note_off_for_lua(lua_State *L) {
-    int chan = luaL_checkinteger(L, 1);
-    int note = luaL_checkinteger(L, 2);
-    int velo = luaL_checkinteger(L, 3);
-    note_off(chan, note, velo);
+int note_on_off_for_lua(lua_State *L) {
+    int on_off = luaL_checkinteger(L, 1);
+    int chan   = luaL_checkinteger(L, 2);
+    int note   = luaL_checkinteger(L, 3);
+    int velo   = luaL_checkinteger(L, 4);
+    note_on_off(on_off, chan, note, velo);
     return 0; // The number of returned values
 }
 
@@ -178,13 +169,9 @@ int load_lua_rules() {
             lua_pop(L, lua_gettop(L));
         }
         // Check if the relevant functions are defined
-        lua_getglobal(L, "on_note_on");
-        if (lua_isfunction(L, -1)) on_note_on_defined = 1;
-        else on_note_on_defined = 0;
-        lua_pop(L, lua_gettop(L));
-        lua_getglobal(L, "on_note_off");
-        if (lua_isfunction(L, -1)) on_note_off_defined = 1;
-        else on_note_off_defined = 0;
+        lua_getglobal(L, "on_note");
+        if (lua_isfunction(L, -1)) on_note_defined = 1;
+        else on_note_defined = 0;
         lua_pop(L, lua_gettop(L));
         lua_getglobal(L, "on_cc");
         if (lua_isfunction(L, -1)) on_cc_defined = 1;
@@ -199,9 +186,8 @@ int load_lua_rules() {
         else click_defined = 0;
         lua_pop(L, lua_gettop(L));
         printf("In %s are defined:\n", filename);
-        printf("  on_note_on:%d on_note_off:%d on_cc:%d on_pc:%d click:%d\n",
-            on_note_on_defined, on_note_off_defined,
-            on_cc_defined, on_pc_defined, click_defined);
+        printf("  on_note:%d on_cc:%d on_pc:%d click:%d\n",
+            on_note_defined, on_cc_defined, on_pc_defined, click_defined);
         // Thank you Lua!!!
         // We do not close the Lua state L for subsequent use
         // lua_close()
@@ -218,25 +204,17 @@ int reload_for_lua(lua_State *L) {
 
 int midi_process(const snd_seq_event_t *ev) {
     if((ev->type==SND_SEQ_EVENT_NOTEON)||(ev->type==SND_SEQ_EVENT_NOTEOFF)) {
+        int on_off = (ev->type==SND_SEQ_EVENT_NOTEON) ? 1 : 0;
         int chan = ev->data.note.channel;
         int note = ev->data.note.note;
         int velo = ev->data.note.velocity;
-        const char *type = (ev->type==SND_SEQ_EVENT_NOTEON) ? "on " : "off";
+        const char *type = on_off ? "on " : "off";
         printf("Ch:%2d Note %s: %2x vel(%2x)\n", chan, type, note, velo);
-        if(ev->type == SND_SEQ_EVENT_NOTEON) {
-            if(on_note_on_defined) {
-                call_lua_fn("on_note_on", chan, note, velo);
-                return 0;
-            } else {
-                return note_on(chan, note, velo);
-            }
-        } else if(ev->type == SND_SEQ_EVENT_NOTEOFF) {
-            if(on_note_off_defined) {
-                call_lua_fn("on_note_off", chan, note, velo);
-                return 0;
-            } else {
-                return note_off(chan, note, velo);
-            }
+        if(on_note_defined) {
+            call_lua_fn("on_note", on_off, chan, note, velo);
+            return 0;
+        } else {
+            return note_on_off(on_off, chan, note, velo);
         }
     } else if(ev->type == SND_SEQ_EVENT_PITCHBEND) {
         int chan = ev->data.control.channel;
@@ -257,7 +235,7 @@ int midi_process(const snd_seq_event_t *ev) {
         int val   = ev->data.control.value;
         printf("Ch:%2d Control: %2x val(%2x)\n", chan, param, val);
         if(on_cc_defined) {
-            call_lua_fn("on_cc", chan, param, val);
+            call_lua_fn("on_cc", chan, param, val, 0);
             return 0;
         } else {
             return cc(chan, param, val);
@@ -267,7 +245,7 @@ int midi_process(const snd_seq_event_t *ev) {
         int val  = ev->data.control.value;
         printf("Ch:%2d PGM ch.: %2x\n", chan, val);
         if(on_pc_defined) {
-            call_lua_fn("on_pc", chan, val, 0);
+            call_lua_fn("on_pc", chan, val, 0, 0);
             return 0;
         } else {
             return pc(chan, val);
@@ -313,10 +291,8 @@ int main(int argc, char *argv[]) {
     // expose some C code to Lua
     lua_pushcfunction(L, reload_for_lua);
     lua_setglobal(L, "reload_rules");
-    lua_pushcfunction(L, note_on_for_lua);
-    lua_setglobal(L, "note_on");
-    lua_pushcfunction(L, note_off_for_lua);
-    lua_setglobal(L, "note_off");
+    lua_pushcfunction(L, note_on_off_for_lua);
+    lua_setglobal(L, "note_on_off");
     lua_pushcfunction(L, cc_for_lua);
     lua_setglobal(L, "cc");
     lua_pushcfunction(L, pc_for_lua);
