@@ -22,7 +22,7 @@ static int click_defined = 0;
 static double BPM = 120;
 // TOD is 'time of day', as is called the function from time.h
 struct timeval last_TOD, TOD;
-double elapsed = 0;
+double elapsed;
 
 // https://lucasklassmann.com/blog/2019-02-02-embedding-lua-in-c/
 static lua_State *L;
