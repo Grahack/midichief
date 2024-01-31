@@ -319,7 +319,7 @@ end
 
 function incontrol()
     -- set the Launchkey in its InControl mode
-    note_on(0, 12, 127)
+    note_on(0, 12, 127)  -- 0 for chan 0(1), note 12 and velo 127
 end
 
 -- codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
