@@ -98,6 +98,7 @@ int pb(int channel, int value) {
 }
 
 int keypress(int channel, int note, int velocity) {
+    // aftertouch
     snd_seq_event_t ev = new_event();
     snd_seq_ev_set_keypress(&ev, channel, note, velocity);
     return send_event(ev);
