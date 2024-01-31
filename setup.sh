@@ -24,6 +24,19 @@ connect_ALSA() {
     fi
 }
 
+check_running() {
+    # min BPM is 10 so the log file should be touched at least every 6s
+    sleep 7
+    AGE_IN_SECONDS=$((($(date +%s) - $(date +%s -r midichief.log))))
+    if [ "$AGE_IN_SECONDS" -gt 7 ]; then  # min BPM is 10 so every 6s
+        echo "Too old! Restarting..."
+        sh $MC_DIR/setup.sh
+    else
+        echo "Young enough!"
+        check_running
+    fi
+}
+
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
 fluidsynth -i --server --gain 4 --audio-driver=alsa \
@@ -43,4 +56,5 @@ $SM --out $FLUID_PORT --control-change 1 7 0    # chan 1(2) (NTS)
 $SM --out $FLUID_PORT --control-change 9 7 127
 # alert MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
+check_running
 log "Ready at $(date +%T)"
