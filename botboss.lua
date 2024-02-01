@@ -750,9 +750,9 @@ function on_note(on_off, chan, note, velo)
         -- these notes are for the NTS and are meant to be bass notes
         -- except for the highest on the keyboard: drum sounds
         if drums_mode then
-            if note == 70 then      -- HH
+            if note == 68 then      -- HH
                 note_on_off(on_off, CHAN_drums, NOTE_HH,   velo);
-            elseif note == 68 then  -- kick
+            elseif note == 70 then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 72 then  -- snare
                 note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
