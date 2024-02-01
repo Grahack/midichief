@@ -10,6 +10,7 @@ local NOTE_HH   = 42
 local NOTE_KICK = 36
 local NOTE_SN   = 40
 local NOTE_O_HH = 46
+local NOTE_CRASH = 49
 -- constants for LED colors (Launchkey in InControl mode)
 local BLACK = 0
 local RED = 1
@@ -758,6 +759,8 @@ function on_note(on_off, chan, note, velo)
                 note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
             elseif note == 71 then  -- open HH
                 note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
+            elseif note == 69 then  -- crash
+                note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
             else
                 note_on_off(on_off, chan, note-24, velo);
                 if parakick_mode then
