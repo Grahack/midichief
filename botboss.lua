@@ -226,7 +226,6 @@ function update_LEDs_synth_patch()
     end
     for _, pad in ipairs(pads) do
         local filename = patch_filename(pad, page)
-        -- check synth_patch_page too
         if file_exists(filename) then
             LED("pad_"..pad, ORANGE)
         else
