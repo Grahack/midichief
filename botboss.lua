@@ -1,32 +1,5 @@
 print("BotBoss Lua definitions")
 
--- state variables
-local page = 0  -- can be any non negative integer
-local halt_press = 0   -- to implement long press
-local drums_mode = false     -- drums on higher notes of the kbd?
-local parakick_mode = false  -- parallel kick on bass notes?
-BPM = 60  -- global for access from midichief.c
-local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
-local click_press = 0  -- to implement long press
-local click_edit  = false  -- edit mode activated?
-local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
-local click_note  = 42  -- HH by default
-local click_lit   = false  -- to implement alternating LEDs
--- tweak synth sound
-local synth_cur_line = 1     -- 1 is OSC FILT EG / 2 is MOD DELAY REV
-                             -- used as the key of this next table
-local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
--- line .. "_" .. pad will be used as a key for this next table
-local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
-                        ["2_05"] = 1, ["2_06"] = 1, ["2_07"] = 1}
--- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
--- patch handling
-local pressed = {}  -- to implement long press for synth patches
--- current patch: pad and page
-local synth_patch_pad  = nil
-local synth_patch_page = nil
--- see also current_patch below
-
 -- CONSTANTS
 local FILE_PREFIX = "/home/chri/botboss/midichief/"
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
@@ -52,7 +25,6 @@ local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 -- A+  FREQ LFO 24  FREQ cs  46  FREQ t  21     X           X         X
 -- B+  DEPTH    26  DEPTH cs 45  DEPTH t 20     X        MIX   33  MIX   36
 --     pitch/shape  cutoff sweep trem
-
 local INIT_PATCH =
 {[ "53"] =   0, -- OSCILLATOR TYPE (vv=0,25,50,75,127)
  [ "54"] =   0, -- OSCILLATOR SHAPE (vv=0~127)
@@ -83,17 +55,6 @@ local INIT_PATCH =
  ["117"] =   0, -- ARP PATTERN (vv=0,12,24,36,48,60,72,84,96,127)
  ["118"] =   0, -- ARP INTERVALS (vv=0,21,42,63,84,127)
  ["119"] =   0} -- ARP LENGTH (vv=0~127)
-
-function init_patch()
-    local t = {}
-    for param, value in pairs(INIT_PATCH) do
-        t[param] = value
-    end
-    return t
-end
-
-local current_patch = init_patch()
-
 local CC_map = {}
 CC_map["1_05"] = {54, 55, 24, 26} -- OSC
 CC_map["1_06"] = {43, 44, 46, 45} -- FILT
@@ -109,8 +70,7 @@ CC_map_type_value[6] = {0,21,42,63,84,127}
 CC_map_type_value[7] = {0,18,36,54,72,90,127}
 local synth_max_type = {["1_05"] = 5, ["1_06"] = 7, ["1_07"] = 5,
                         ["2_05"] = 5, ["2_06"] = 6, ["2_07"] = 6}
-
--- display constants
+-- Display constants
 local LED_map = {}
 LED_map["play_up"]   = 104
 LED_map["play_down"] = 120
@@ -130,9 +90,9 @@ LED_map["pad_13"] = 116
 LED_map["pad_14"] = 117
 LED_map["pad_15"] = 118
 LED_map["pad_16"] = 119
--- pad numbers for binary display of BPM
+-- Pad numbers for binary display of BPM
 local PADS_click = {"12", "11", "10", "09", "04", "03", "02", "01"}
--- modifiers for binary pads
+-- Modifiers for binary pads
 local PADS_click_bit_num = {}
 PADS_click_bit_num["01"] = 8
 PADS_click_bit_num["02"] = 7
@@ -155,13 +115,77 @@ PADS_click_modif["13"] =  -1
 PADS_click_modif["14"] =  -5
 PADS_click_modif["15"] =   5
 PADS_click_modif["16"] =   1
--- pad numbers for binary display of synth types
+-- Pad numbers for binary display of synth types
 local PADS_synth = {"16", "15", "14", "13"}
+-- Codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
+local cc_fns = {}  -- buttons which send control change events
+local n_fns = {}   -- buttons which send note events
+cc_fns[106] = "track_L"
+cc_fns[107] = "track_R"
+cc_fns[21] = "pot_1"
+cc_fns[22] = "pot_2"
+cc_fns[23] = "pot_3"
+cc_fns[24] = "pot_4"
+cc_fns[25] = "pot_5"
+cc_fns[26] = "pot_6"
+cc_fns[27] = "pot_7"
+cc_fns[28] = "pot_8"
+n_fns[ 96] = "pad_01"
+n_fns[ 97] = "pad_02"
+n_fns[ 98] = "pad_03"
+n_fns[ 99] = "pad_04"
+n_fns[100] = "pad_05"
+n_fns[101] = "pad_06"
+n_fns[102] = "pad_07"
+n_fns[103] = "pad_08"
+n_fns[112] = "pad_09"
+n_fns[113] = "pad_10"
+n_fns[114] = "pad_11"
+n_fns[115] = "pad_12"
+n_fns[116] = "pad_13"
+n_fns[117] = "pad_14"
+n_fns[118] = "pad_15"
+n_fns[119] = "pad_16"
+n_fns[104] = "play_up"
+n_fns[120] = "play_down"
+cc_fns[104] = "scene_up"
+cc_fns[105] = "scene_down"
 
-function LED(where, color)
-    note_on_off(0, CHAN_LK, LED_map[where], color)
-    note_on_off(1, CHAN_LK, LED_map[where], color)
+-- This function is used in the state section so is defined before it
+function init_patch()
+    local t = {}
+    for param, value in pairs(INIT_PATCH) do
+        t[param] = value
+    end
+    return t
 end
+
+-- State variables
+local page = 0  -- can be any non negative integer
+local halt_press = 0   -- to implement long press
+local drums_mode = false     -- drums on higher notes of the kbd?
+local parakick_mode = false  -- parallel kick on bass notes?
+BPM = 60  -- global for access from midichief.c
+local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
+local click_press = 0  -- to implement long press
+local click_edit  = false  -- edit mode activated?
+local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
+local click_note  = 42  -- HH by default
+local click_lit   = false  -- to implement alternating LEDs
+-- tweak synth sound
+local synth_cur_line = 1     -- 1 is OSC FILT EG / 2 is MOD DELAY REV
+                             -- used as the key of this next table
+local synth_cur_pad  = {"05", "05"}  -- OSC and MOD (see below)
+-- line .. "_" .. pad will be used as a key for this next table
+local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
+                        ["2_05"] = 1, ["2_06"] = 1, ["2_07"] = 1}
+-- OSC=1_05   FILT=1_06   EG=1_07  /  MOD=2_05   DELAY=2_06   DELAY=2_07
+-- patch handling
+local pressed = {}  -- to implement long press for synth patches
+-- current patch: pad and page
+local synth_patch_pad  = nil
+local synth_patch_page = nil
+local current_patch = init_patch()
 
 function click()
     print("BPM=", BPM)
@@ -206,6 +230,11 @@ function play_down_2(on_off)
         page = 1
         update_LEDs()
     end
+end
+
+function LED(where, color)
+    note_on_off(0, CHAN_LK, LED_map[where], color)
+    note_on_off(1, CHAN_LK, LED_map[where], color)
 end
 
 function update_LEDs_visual_BPM()
@@ -324,46 +353,6 @@ function incontrol()
     -- 1 for on, 0 for chan 0(1), note 12 and velo 127
     note_on_off(1, 0, 12, 127)
 end
-
--- codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
-local cc_fns = {}
-local n_fns = {}
-
-cc_fns[106] = "track_L"
-cc_fns[107] = "track_R"
-
-cc_fns[21] = "pot_1"
-cc_fns[22] = "pot_2"
-cc_fns[23] = "pot_3"
-cc_fns[24] = "pot_4"
-cc_fns[25] = "pot_5"
-cc_fns[26] = "pot_6"
-cc_fns[27] = "pot_7"
-cc_fns[28] = "pot_8"
-
-n_fns[ 96] = "pad_01"
-n_fns[ 97] = "pad_02"
-n_fns[ 98] = "pad_03"
-n_fns[ 99] = "pad_04"
-n_fns[100] = "pad_05"
-n_fns[101] = "pad_06"
-n_fns[102] = "pad_07"
-n_fns[103] = "pad_08"
-
-n_fns[112] = "pad_09"
-n_fns[113] = "pad_10"
-n_fns[114] = "pad_11"
-n_fns[115] = "pad_12"
-n_fns[116] = "pad_13"
-n_fns[117] = "pad_14"
-n_fns[118] = "pad_15"
-n_fns[119] = "pad_16"
-
-n_fns[104] = "play_up"
-n_fns[120] = "play_down"
-
-cc_fns[104] = "scene_up"
-cc_fns[105] = "scene_down"
 
 function pad_05_0(on_off)
     -- click edit
