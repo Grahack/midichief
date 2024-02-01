@@ -23,8 +23,8 @@ local synth_cur_type = {["1_05"] = 1, ["1_06"] = 1, ["1_07"] = 1,
 -- patch handling
 local pressed = {}  -- to implement long press for synth patches
 -- current patch: pad and page
-local synth_patch_pad  = "09"
-local synth_patch_page = 1
+local synth_patch_pad  = nil
+local synth_patch_page = nil
 -- see also current_patch below
 
 -- CONSTANTS
@@ -688,7 +688,9 @@ function patch(pad, on_off)
         local release = os.time()
         local filename = patch_filename(pad, page)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
-            LED("pad_"..synth_patch_pad, BLACK)
+            if synth_patch_pad ~= nil then
+                LED("pad_"..synth_patch_pad, BLACK)
+            end
             LED("pad_"..pad, RED)
             -- save
             local content = patch_to_MIDI_content(current_patch)
