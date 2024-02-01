@@ -240,6 +240,7 @@ end
 
 function update_LEDs()
     if page == 0 then
+        -- click
         LED("play_up", BLACK)
         LED("play_down", YELLOW)
         LED("pad_05", click_colors[click_mode + 1])
@@ -251,6 +252,7 @@ function update_LEDs()
         LED("pad_15", BLACK)
         LED("pad_16", BLACK)
     elseif page == 1 then
+        -- admin and synth
         LED("play_up", YELLOW)
         LED("play_down", BLACK)
         LED("pad_01", GREEN)
@@ -268,6 +270,7 @@ function update_LEDs()
         update_LEDs_synth_patch()
         update_LEDs_synth()
     elseif page == 2 then
+        -- patches
         LED("play_up", RED)
         LED("play_down", BLACK)
         update_LEDs_synth_patch()
