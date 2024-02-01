@@ -6,7 +6,7 @@ LS=$BB_DIR/divs-midi-utilities/bin/lsmidiouts
 LOG=$MC_DIR/midichief.log
 FONT=/usr/share/sounds/sf2/FluidR3_GM.sf2
 NUM_SOUNDCARD=$(cat /proc/asound/cards | \
-                grep "USB-Audio - USB Audio CODEC" | \
+                grep "USB-Audio - USB PnP Sound Device" | \
                 cut -d' ' -f2)
 
 log() {
@@ -39,7 +39,7 @@ check_running() {
 
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
-fluidsynth -i --server --gain 4 --audio-driver=alsa \
+fluidsynth -i --server --gain 10 --audio-driver=alsa \
            -o audio.alsa.device=hw:$NUM_SOUNDCARD \
            $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
