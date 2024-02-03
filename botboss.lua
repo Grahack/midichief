@@ -262,7 +262,7 @@ function update_LEDs_synth_patch()
             LED("pad_"..pad, BLACK)
         end
     end
-    if page == synth_patch_page then
+    if page == synth_patch_page and synth_patch_pad ~= nil then
         LED("pad_"..synth_patch_pad, GREEN)
     end
 end
