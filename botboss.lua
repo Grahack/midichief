@@ -677,6 +677,7 @@ function patch(pad, on_off)
         local release = os.time()
         local filename = patch_filename(pad, page)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
+            -- switch off previous pad
             if synth_patch_pad ~= nil then
                 LED("pad_"..synth_patch_pad, BLACK)
             end
