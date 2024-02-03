@@ -27,7 +27,7 @@ connect_ALSA() {
 check_running() {
     # min BPM is 10 so the log file should be touched at least every 6s
     sleep 7
-    AGE_IN_SECONDS=$((($(date +%s) - $(date +%s -r midichief.log))))
+    AGE_IN_SECONDS=$((($(date +%s) - $(date +%s -r $LOG))))
     if [ "$AGE_IN_SECONDS" -gt 7 ]; then  # min BPM is 10 so every 6s
         echo "Too old! Restarting..."
         sh $MC_DIR/setup.sh
