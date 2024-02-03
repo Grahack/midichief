@@ -56,5 +56,5 @@ $SM --out $FLUID_PORT --control-change 1 7 0    # chan 1(2) (NTS)
 $SM --out $FLUID_PORT --control-change 9 7 127
 # alert MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
-check_running
 log "Ready at $(date +%T)"
+check_running
