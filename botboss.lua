@@ -549,6 +549,7 @@ function send_MIDI_content(content, chan)
     for param, value in pairs(patch) do
         if value ~= current_patch[param] then
             cc(chan, param, value)
+            sleep(5)
         end
     end
 end
