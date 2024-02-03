@@ -344,7 +344,6 @@ function update_LEDs_synth()
     update_LEDs_synth_type()
 end
 
--- Used to play melodies
 function sleep(n)
     os.execute("sleep " .. (n/1000))
 end
