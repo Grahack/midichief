@@ -205,29 +205,29 @@ function click()
     end
 end
 
-function play_up_0(on_off)
-    if on_off == 0 then  -- on release
+function track_R_0(value)
+    if value == 0 then  -- on release
         page = 1
         update_LEDs()
     end
 end
 
-function play_up_1(on_off)
-    if on_off == 0 then  -- on release
+function track_R_1(value)
+    if value == 0 then  -- on release
         page = 2
         update_LEDs()
     end
 end
 
-function play_down_1(on_off)
-    if on_off == 0 then  -- on release
+function track_L_1(value)
+    if value == 0 then  -- on release
         page = 0
         update_LEDs()
     end
 end
 
-function play_down_2(on_off)
-    if on_off == 0 then  -- on release
+function track_L_2(value)
+    if value == 0 then  -- on release
         page = 1
         update_LEDs()
     end
@@ -270,8 +270,6 @@ end
 function update_LEDs()
     if page == 0 then
         -- click
-        LED("play_up", BLACK)
-        LED("play_down", YELLOW)
         LED("pad_05", click_colors[click_mode + 1])
         update_LEDs_visual_BPM()
         update_LEDs_BPM()
@@ -282,8 +280,6 @@ function update_LEDs()
         end
     elseif page == 1 then
         -- admin and synth
-        LED("play_up", YELLOW)
-        LED("play_down", BLACK)
         LED("pad_01", GREEN)
         if drums_mode then
             LED("pad_02", GREEN)
@@ -300,12 +296,10 @@ function update_LEDs()
         update_LEDs_synth()
     elseif page == 2 then
         -- patches
-        LED("play_up", RED)
-        LED("play_down", BLACK)
         update_LEDs_synth_patch()
     else
-        LED("play_up", RED)
-        LED("play_down", RED)
+        LED("play_up", ORANGE)
+        LED("play_down", ORANGE)
     end
 end
 
