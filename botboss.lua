@@ -261,7 +261,14 @@ function update_LEDs_synth_patch()
     for _, pad in ipairs(pads) do
         local filename = patch_filename(pad, page)
         if file_exists(filename) then
-            LED("pad_"..pad, ORANGE)
+            -- load color
+            local content = load_content(filename)
+            local patch = load("return "..content)()
+            if patch.color then
+                LED("pad_"..pad, patch_colors[patch.color])
+            else
+                LED("pad_"..pad, ORANGE)
+            end
         else
             LED("pad_"..pad, BLACK)
         end
@@ -558,7 +565,7 @@ end
 function send_MIDI_content(content, chan)
     local patch = load("return "..content)()
     for param, value in pairs(patch) do
-        if value ~= current_patch[param] then
+        if param ~= "color" and value ~= current_patch[param] then
             cc(chan, param, value)
             sleep(5)
         end
@@ -680,6 +687,7 @@ end
 function confirm(value)
     if value == 0 then  -- release
         if confirm_what == "save patch" then
+            current_patch.color = save_color
             save_patch(save_filename)
             update_LEDs_synth_patch()
             save_color = 1
