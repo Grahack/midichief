@@ -19,6 +19,7 @@ local GREEN = 16
 local APPLE = 49
 local ORANGE = 19
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
+local patch_colors = {RED, ORANGE, YELLOW, APPLE}
 -- synth
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
@@ -162,6 +163,7 @@ function init_patch()
 end
 
 -- State variables
+local confirm_what = nil
 local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
 local drums_mode = false     -- drums on higher notes of the kbd?
@@ -187,6 +189,8 @@ local pressed = {}  -- to implement long press for synth patches
 local synth_patch_pad  = nil
 local synth_patch_page = nil
 local current_patch = init_patch()
+local save_filename = nil
+local save_color = 1
 
 function click()
     print("BPM=", BPM)
@@ -267,7 +271,18 @@ function update_LEDs_synth_patch()
     end
 end
 
+function update_LEDs_confirm()
+    if confirm_what ~= nil then
+        LED("play_up", GREEN)
+        LED("play_down", RED)
+    else
+        LED("play_up", BLACK)
+        LED("play_down", BLACK)
+    end
+end
+
 function update_LEDs()
+    update_LEDs_confirm()
     if page == 0 then
         -- click
         LED("pad_05", click_colors[click_mode + 1])
@@ -662,8 +677,64 @@ function synth_pot(pot, value)
     current_patch[param] = value
 end
 
+function confirm(value)
+    if value == 0 then  -- release
+        if confirm_what == "save patch" then
+            save_patch(save_filename)
+            update_LEDs_synth_patch()
+            save_color = 1
+        end
+        confirm_what = nil
+        update_LEDs_confirm()
+    end
+end
+
+function cancel(value)
+    if value == 0 then  -- release
+        print(confirm_what)
+        if confirm_what == "save patch" then
+            update_LEDs_synth_patch()
+            save_color = 1
+        end
+        confirm_what = nil
+        update_LEDs_confirm()
+    end
+end
+
+function play_down_1(value) cancel(value) end
+function play_down_2(value) cancel(value) end
+function play_up_1(value) confirm(value) end
+function play_up_2(value) confirm(value) end
+
 function patch_filename(the_pad, the_page)
     return FILE_PREFIX .. "pad_"..the_pad.."_"..the_page..".btbs"
+end
+
+function load_patch(filename)
+    local content = load_content(filename)
+    send_MIDI_content(content, CHAN_NTS)
+    -- update the state: first the current patch
+    current_patch = MIDI_content_to_patch(content)
+    -- then the types of OSC FILT EG MOD DELAY REV
+    for pad, param in pairs(CC_map_type_param) do
+        -- TODO: fix the mess about CC params
+        -- sometimes numbers, sometimes strings
+        local param_as_str = tostring(param)
+        local value = current_patch[param_as_str]
+        local max = synth_max_type[pad]
+        for i, v in ipairs(CC_map_type_value[max]) do
+            if v == value then
+                synth_cur_type[pad] = i
+                break
+            end
+        end
+    end
+end
+
+function save_patch(filename)
+    local content = patch_to_MIDI_content(current_patch)
+    save_content(content, filename)
+    print(filename, "saved!")
 end
 
 function patch(pad, on_off)
@@ -674,44 +745,30 @@ function patch(pad, on_off)
         local release = os.time()
         local filename = patch_filename(pad, page)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
-            -- switch off previous pad
-            if synth_patch_pad ~= nil then
-                LED("pad_"..synth_patch_pad, BLACK)
-            end
-            LED("pad_"..pad, RED)
-            -- save
-            local content = patch_to_MIDI_content(current_patch)
-            save_content(content, filename)
-            print(filename, "saved!")
-            sleep(200)
+            -- save patch mode
+            LED("pad_"..pad, patch_colors[save_color])
+            confirm_what = "save patch"
+            save_filename = filename
+            update_LEDs_confirm()
         else
-            -- load
-            if file_exists(filename) then
-                local content = load_content(filename)
-                send_MIDI_content(content, CHAN_NTS)
-                -- update the state: first the current patch
-                current_patch = MIDI_content_to_patch(content)
-                -- then the types of OSC FILT EG MOD DELAY REV
-                for pad, param in pairs(CC_map_type_param) do
-                    -- TODO: fix the mess about CC params
-                    -- sometimes numbers, sometimes strings
-                    local param_as_str = tostring(param)
-                    local value = current_patch[param_as_str]
-                    local max = synth_max_type[pad]
-                    for i, v in ipairs(CC_map_type_value[max]) do
-                        if v == value then
-                            synth_cur_type[pad] = i
-                            break
-                        end
-                    end
+            -- rotate colors
+            if confirm_what == "save patch" then
+                save_color = save_color % #patch_colors + 1
+                LED("pad_"..pad, patch_colors[save_color])
+            -- load patch
+            else
+                if file_exists(filename) then
+                    load_patch(filename)
+                    synth_patch_pad = pad
+                    synth_patch_page = page
+                    update_LEDs_synth_patch()
+                    update_LEDs_synth()
+                else
+                    LED("pad_"..pad, BLACK)
                 end
-                synth_patch_pad = pad
-                synth_patch_page = page
-                update_LEDs_synth()
             end
         end
         pressed[pad] = nil
-        update_LEDs_synth_patch()
     end
 end
 
