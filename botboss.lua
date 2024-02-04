@@ -326,16 +326,18 @@ function update_LEDs_synth_type()
 end
 
 function update_LEDs_synth()
-    LED("pad_05", BLACK)
-    LED("pad_06", BLACK)
-    LED("pad_07", BLACK)
-    LED("pad_"..synth_cur_pad[synth_cur_line], GREEN)
-    if synth_cur_line == 1 then
-        LED("pad_08", APPLE)
-    else
-        LED("pad_08", ORANGE)
+    if page == 1 then
+        LED("pad_05", BLACK)
+        LED("pad_06", BLACK)
+        LED("pad_07", BLACK)
+        LED("pad_"..synth_cur_pad[synth_cur_line], GREEN)
+        if synth_cur_line == 1 then
+            LED("pad_08", APPLE)
+        else
+            LED("pad_08", ORANGE)
+        end
+        update_LEDs_synth_type()
     end
-    update_LEDs_synth_type()
 end
 
 function sleep(n)
