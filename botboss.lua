@@ -608,6 +608,7 @@ function send_synth_type()
 end
 
 function scene_up_1(value)
+    -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
         local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
         local old = synth_cur_type[key]
@@ -620,6 +621,7 @@ function scene_up_1(value)
 end
 
 function scene_down_1(value)
+    -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
         local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
         local old = synth_cur_type[key]
