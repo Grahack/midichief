@@ -588,6 +588,7 @@ function pad_06_1(on_off) synth_pad("06", on_off) end
 function pad_07_1(on_off) synth_pad("07", on_off) end
 
 function pad_08_1(on_off)
+    -- change current line of synth controls
     if on_off == 1 then
         LED("pad_08", YELLOW)
     else
