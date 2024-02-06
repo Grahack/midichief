@@ -190,6 +190,7 @@ local synth_patch_pad  = nil
 local synth_patch_page = nil
 local current_patch = init_patch()
 local save_filename = nil
+local save_pad = nil
 local save_color = 1
 
 function click()
@@ -247,6 +248,14 @@ function update_LEDs_visual_BPM()
         LED("pad_08", APPLE)
     else
         LED("pad_08", BLACK)
+    end
+end
+
+function update_LEDs_black()
+    local pads = {"01", "02", "03", "04","05", "06", "07", "08",
+                  "09", "10", "11", "12","13", "14", "15", "16"}
+    for _, pad in ipairs(pads) do
+        LED("pad_"..pad, BLACK)
     end
 end
 
@@ -699,6 +708,7 @@ function confirm(value)
             current_patch.color = save_color
             save_patch(save_filename)
             update_LEDs_synth_patch()
+            save_pad = pad
             save_color = 1
         end
         confirm_what = nil
@@ -755,6 +765,7 @@ function save_patch(filename)
 end
 
 function patch(pad, on_off)
+    if confirm_what == "save patch" and save_pad ~= pad then return end
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
         pressed[pad] = os.time()
@@ -763,8 +774,10 @@ function patch(pad, on_off)
         local filename = patch_filename(pad, page)
         if pressed[pad] ~= nil and release - pressed[pad] >= 2 then
             -- save patch mode
+            update_LEDs_black()
             LED("pad_"..pad, patch_colors[save_color])
             confirm_what = "save patch"
+            save_pad = pad
             save_filename = filename
             update_LEDs_confirm()
         else
