@@ -3,7 +3,7 @@ BB_DIR=/home/chri/botboss
 MC_DIR=$BB_DIR/midichief
 SM=$BB_DIR/divs-midi-utilities/bin/sendmidi
 LS=$BB_DIR/divs-midi-utilities/bin/lsmidiouts
-LOG=$MC_DIR/midichief.log
+LOG=$MC_DIR/midichief-$(date '+%Y%m%d-%H%M%S').log
 FONT=/usr/share/sounds/sf2/FluidR3_GM.sf2
 NUM_SOUNDCARD=$(cat /proc/asound/cards | \
                 grep "USB-Audio - USB PnP Sound Device" | \
