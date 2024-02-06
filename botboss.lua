@@ -253,10 +253,10 @@ end
 function update_LEDs_synth_patch()
     local pads = {}
     if page == 1 then
-        local pads = {"09", "10", "11", "12"}
+        pads = {"09", "10", "11", "12"}
     elseif page == 2 then
-        local pads = {"01", "02", "03", "04","05", "06", "07", "08",
-                      "09", "10", "11", "12","13", "14", "15", "16"}
+        pads = {"01", "02", "03", "04","05", "06", "07", "08",
+                "09", "10", "11", "12","13", "14", "15", "16"}
     end
     for _, pad in ipairs(pads) do
         local filename = patch_filename(pad, page)
