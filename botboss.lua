@@ -211,6 +211,7 @@ function click()
 end
 
 function track_R_0(value)
+    if confirm_what then return end
     if value == 0 then  -- on release
         page = 1
         update_LEDs()
@@ -218,6 +219,7 @@ function track_R_0(value)
 end
 
 function track_R_1(value)
+    if confirm_what then return end
     if value == 0 then  -- on release
         page = 2
         update_LEDs()
@@ -225,6 +227,7 @@ function track_R_1(value)
 end
 
 function track_L_1(value)
+    if confirm_what then return end
     if value == 0 then  -- on release
         page = 0
         update_LEDs()
@@ -232,6 +235,7 @@ function track_L_1(value)
 end
 
 function track_L_2(value)
+    if confirm_what then return end
     if value == 0 then  -- on release
         page = 1
         update_LEDs()
@@ -382,6 +386,7 @@ function incontrol()
 end
 
 function pad_05_0(on_off)
+    if confirm_what then return end
     -- click edit
     if on_off == 1 then
         click_press = os.time()
@@ -401,6 +406,7 @@ function pad_05_0(on_off)
 end
 
 function click_bin_modif(pad)
+    if confirm_what then return end
     local bit_num = PADS_click_bit_num[pad]
     local modif = PADS_click_modif[pad]
     if BPM_bits[bit_num] > 0 then
@@ -423,6 +429,7 @@ function pad_11_0(on_off) if on_off == 0 then click_bin_modif("11") end end
 function pad_12_0(on_off) if on_off == 0 then click_bin_modif("12") end end
 
 function pad_06_0(on_off)
+    if confirm_what then return end
     -- half time
     if on_off == 1 then
         LED("pad_06", YELLOW)
@@ -440,6 +447,7 @@ function pad_06_0(on_off)
 end
 
 function pad_07_0(on_off)
+    if confirm_what then return end
     -- double time
     if on_off == 1 then
         LED("pad_07", YELLOW)
@@ -455,6 +463,7 @@ function pad_07_0(on_off)
 end
 
 function increment(pad, on_off)
+    if confirm_what then return end
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
     else
@@ -474,6 +483,7 @@ function pad_15_0(on_off) increment("15", on_off) end
 function pad_16_0(on_off) increment("16", on_off) end
 
 function pad_08_0(on_off)
+    if confirm_what then return end
     -- tap tempo
     if on_off == 1 then
         LED("pad_08", RED)
@@ -490,6 +500,7 @@ function pad_08_0(on_off)
 end
 
 function pad_01_1(on_off)
+    if confirm_what then return end
     -- reload or halt
     if on_off == 1 then
         LED("pad_01", YELLOW)
@@ -512,6 +523,7 @@ function pad_01_1(on_off)
 end
 
 function pad_02_1(on_off)
+    if confirm_what then return end
     -- drums high on the keyboard?
     if on_off == 1 then
         LED("pad_02", YELLOW)
@@ -526,6 +538,7 @@ function pad_02_1(on_off)
 end
 
 function pad_03_1(on_off)
+    if confirm_what then return end
     -- parallel kick for bass notes?
     if on_off == 1 then
         LED("pad_03", YELLOW)
@@ -582,6 +595,7 @@ function send_MIDI_content(content, chan)
 end
 
 function synth_pad(pad, on_off)
+    if confirm_what then return end
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
     else
@@ -597,6 +611,7 @@ function pad_06_1(on_off) synth_pad("06", on_off) end
 function pad_07_1(on_off) synth_pad("07", on_off) end
 
 function pad_08_1(on_off)
+    if confirm_what then return end
     -- change current line of synth controls
     if on_off == 1 then
         LED("pad_08", YELLOW)
@@ -617,6 +632,7 @@ function send_synth_type()
 end
 
 function scene_up_1(value)
+    if confirm_what then return end
     -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
         local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
@@ -630,6 +646,7 @@ function scene_up_1(value)
 end
 
 function scene_down_1(value)
+    if confirm_what then return end
     -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
         local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
@@ -675,6 +692,7 @@ function BPM_int(bpm)
 end
 
 function pot_5_0(value)
+    if confirm_what then return end
     local old_BPM = BPM
     -- f(x) = ax^2 + bx + c
     -- f'(x) = 2ax + b
@@ -690,6 +708,7 @@ function pot_5_0(value)
 end
 
 function synth_pot(pot, value)
+    if confirm_what then return end
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
     param = CC_map[key][pot]
     cc(CHAN_NTS, param, value)
