@@ -1,7 +1,7 @@
 print("BotBoss Lua definitions")
 
 -- CONSTANTS
-local FILE_PREFIX = "/home/chri/botboss/midichief/"
+local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_drums = 9
