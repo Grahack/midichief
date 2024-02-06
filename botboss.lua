@@ -687,6 +687,12 @@ function synth_pot(pot, value)
     current_patch[param] = value
 end
 
+-- handling pots for synth params
+function pot_5_1(value) synth_pot(1, value) end
+function pot_6_1(value) synth_pot(2, value) end
+function pot_7_1(value) synth_pot(3, value) end
+function pot_8_1(value) synth_pot(4, value) end
+
 function confirm(value)
     if value == 0 then  -- release
         if confirm_what == "save patch" then
@@ -803,12 +809,6 @@ function pad_13_2(on_off) patch("13", on_off) end
 function pad_14_2(on_off) patch("14", on_off) end
 function pad_15_2(on_off) patch("15", on_off) end
 function pad_16_2(on_off) patch("16", on_off) end
-
--- handling pots for synth params
-function pot_5_1(value) synth_pot(1, value) end
-function pot_6_1(value) synth_pot(2, value) end
-function pot_7_1(value) synth_pot(3, value) end
-function pot_8_1(value) synth_pot(4, value) end
 
 function on_note(on_off, chan, note, velo)
     if chan == 1 then
