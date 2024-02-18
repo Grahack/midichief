@@ -734,12 +734,11 @@ function confirm(value)
         if confirm_what == "save patch" then
             current_patch.color = save_color
             save_patch(save_filename)
-            update_LEDs_synth_patch()
             save_pad = pad
             save_color = 1
         end
         confirm_what = nil
-        update_LEDs_confirm()
+        update_LEDs()
     end
 end
 
@@ -747,11 +746,10 @@ function cancel(value)
     if value == 0 then  -- release
         print(confirm_what)
         if confirm_what == "save patch" then
-            update_LEDs_synth_patch()
             save_color = 1
         end
         confirm_what = nil
-        update_LEDs_confirm()
+        update_LEDs()
     end
 end
 
