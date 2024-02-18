@@ -552,35 +552,43 @@ function pad_03_1(on_off)
     end
 end
 
-function serializeTable(val, name)
-    -- simplified version of
-    -- https://stackoverflow.com/questions/6075262/lua-table-tostringtablename-and-table-fromstringstringtable-functions
-    local tmp = ""
-    if name then tmp = tmp .. name .. " = " end
-    if type(val) == "table" then
-        tmp = tmp .. "{" .. "\n"
-        for k, v in pairs(val) do
-            k = "[\"" .. tostring(k) .. "\"]"
-            tmp =  tmp .. serializeTable(v, k) ..  "," .. "\n"
-        end
-        tmp = tmp .. "}"
-    elseif type(val) == "number" then
-        tmp = tmp .. tostring(val)
-    elseif type(val) == "string" then
-        tmp = tmp .. string.format("%q", val)
-    else
-        tmp = tmp .. "\"[inserializeable datatype:" .. type(val) .. "]\""
+function patch_lines(cc_table, patch)
+    local fragment = ''
+    for _, cc in ipairs(cc_table) do
+        fragment = fragment..'["'..cc..'"] = '..patch[tostring(cc)]..',\n'
     end
-    return tmp
+    return fragment
 end
 
 function patch_to_MIDI_content(patch)
-    -- just a serialization for now
-    return serializeTable(patch)
+    local content = '{\n'
+    --content = content.."-- OSC type shape alt LFO_freq LFO_pitch/shape\n"
+    content = content..patch_lines({53, 54, 55, 24, 26}, patch)
+    content = content..'\n'
+    --content = content.."-- FILT type cutoff reso sweep_freq sweep_depth\n"
+    content = content..patch_lines({42, 43, 44, 46, 45}, patch)
+    content = content..'\n'
+    --content = content.."-- EG type attack_time rel_time trem_freq trem_depth\n"
+    content = content..patch_lines({14, 16, 19, 21, 20}, patch)
+    content = content..'\n'
+    --content = content.."-- MOD type speed depth\n"
+    content = content..patch_lines({88, 28, 29}, patch)
+    content = content..'\n'
+    --content = content.."-- DELAY time depth mix\n"
+    content = content..patch_lines({89, 30, 31, 33}, patch)
+    content = content..'\n'
+    --content = content.."-- REV time depth mix\n"
+    content = content..patch_lines({90, 34, 35, 36}, patch)
+    content = content..'\n'
+    --content = content.."-- ARP\n"
+    content = content..patch_lines({117, 118, 119}, patch)
+    content = content..'\n'
+    content = content..'["color"] = '..patch.color..','
+    content = content..'\n}'
+    return content
 end
 
 function MIDI_content_to_patch(content)
-    -- just a deserialization for now
     return load("return "..content)()
 end
 
