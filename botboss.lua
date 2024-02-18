@@ -628,7 +628,7 @@ function send_synth_type()
     local param = CC_map_type_param[key]
     local value = CC_map_type_value[max_type][num_type]
     cc(CHAN_NTS, param, value)
-    current_patch[param] = value
+    current_patch[tostring(param)] = value
 end
 
 function scene_up_1(value)
@@ -712,7 +712,7 @@ function synth_pot(pot, value)
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
     param = CC_map[key][pot]
     cc(CHAN_NTS, param, value)
-    current_patch[param] = value
+    current_patch[tostring(param)] = value
 end
 
 -- handling pots for synth params
@@ -763,8 +763,6 @@ function load_patch(filename)
     current_patch = MIDI_content_to_patch(content)
     -- then the types of OSC FILT EG MOD DELAY REV
     for pad, param in pairs(CC_map_type_param) do
-        -- TODO: fix the mess about CC params
-        -- sometimes numbers, sometimes strings
         local param_as_str = tostring(param)
         local value = current_patch[param_as_str]
         local max = synth_max_type[pad]
