@@ -6,7 +6,7 @@ LS=$BB_DIR/divs-midi-utilities/bin/lsmidiouts
 LOG=$MC_DIR/midichief-$(date '+%Y%m%d-%H%M%S').log
 FONT=/usr/share/sounds/sf2/FluidR3_GM.sf2
 NUM_SOUNDCARD=$(cat /proc/asound/cards | \
-                grep "USB-Audio - USB PnP Sound Device" | \
+                grep "pisound" | \
                 cut -d' ' -f2)
 
 log() {
@@ -45,8 +45,8 @@ fluidsynth -i --server --gain 10 --audio-driver=alsa \
 connect_ALSA "Launchkey":0 "MIDI Chief":0
 connect_ALSA "Launchkey":1 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "Launchkey":1
-connect_ALSA "UM-1":0 "MIDI Chief":0
-connect_ALSA "MIDI Chief":1 "UM-1":0
+connect_ALSA "pisound":0 "MIDI Chief":0
+connect_ALSA "MIDI Chief":1 "pisound":0
 connect_ALSA "MIDI Chief":1 "FLUID Synth":0
 # Let's silence Fluidsynth on some channels
 FLUID_PORT=$($LS | grep FLUID | cut -d' ' -f3)
