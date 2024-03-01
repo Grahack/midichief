@@ -410,8 +410,10 @@ function click_bin_modif(pad)
     local bit_num = PADS_click_bit_num[pad]
     local modif = PADS_click_modif[pad]
     if BPM_bits[bit_num] > 0 then
-        BPM = BPM - modif
-        BPM_bits[bit_num] = 0
+        if BPM - modif >= 10 then
+            BPM = BPM - modif
+            BPM_bits[bit_num] = 0
+        end
     else
         BPM = BPM + modif
         BPM_bits[bit_num] = 1
