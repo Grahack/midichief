@@ -4,6 +4,7 @@ print("BotBoss Lua definitions")
 local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
+local CHAN_FLUID = 2 -- Fluidsynth channel
 local CHAN_drums = 9
 local DUMMY_CC = 127
 local NOTE_HH   = 42
@@ -152,6 +153,26 @@ n_fns[104] = "play_up"
 n_fns[120] = "play_down"
 cc_fns[104] = "scene_up"
 cc_fns[105] = "scene_down"
+-- MIDI GM categories (but our values should be one less
+--   1 -   8  Keys
+--   9 -  16  Chrom. Perc.
+--  17 -  21  Organs
+--  22 -  24  Accord. Harmonica
+--  25 -  32  Guitars
+--  33 -  40  Basses
+--  41 -  52  Strings (but 48: Timpani)
+--  53 -  55  Voices
+--  56 -  64  Orch. Hit and Brass
+--  65 -  72  Reeds
+--  73 -  80  Wind
+--  81 -  88  Synth lead
+--  89 -  96  Pads
+--  97 - 104  Effets
+-- 105 - 112  Ethnic
+-- 113 - 119  Misc. Perc.
+-- 120 - 128  Effects
+GM_CATEGORIES = {0, 8, 16, 21, 24, 32, 40, 52, 55, 64, 72, 80, 88,
+                 96, 104, 112, 119}
 
 -- This function is used in the state section so is defined before it
 function init_patch()
@@ -192,6 +213,8 @@ local current_patch = init_patch()
 local save_filename = nil
 local save_pad = nil
 local save_color = 1
+-- Fluidsynth
+local fluidsynth_PC = 32  -- the first GM bass sound
 
 function click()
     print("BPM=", BPM)
@@ -226,6 +249,14 @@ function track_R_1(value)
     end
 end
 
+function track_R_2(value)
+    if confirm_what then return end
+    if value == 0 then  -- on release
+        page = 3
+        update_LEDs()
+    end
+end
+
 function track_L_1(value)
     if confirm_what then return end
     if value == 0 then  -- on release
@@ -238,6 +269,14 @@ function track_L_2(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 1
+        update_LEDs()
+    end
+end
+
+function track_L_3(value)
+    if confirm_what then return end
+    if value == 0 then  -- on release
+        page = 2
         update_LEDs()
     end
 end
@@ -291,6 +330,18 @@ function update_LEDs_synth_patch()
     end
 end
 
+function update_LEDs_fluid()
+    local pads = {"01", "02", "03", "04",
+                  "09", "10", "11", "12","13", "14", "15", "16"}
+    for _, pad in ipairs(pads) do
+        LED("pad_"..pad, BLACK)
+    end
+    LED("pad_05", RED)
+    LED("pad_06", GREEN)
+    LED("pad_07", ORANGE)
+    LED("pad_08", APPLE)
+end
+
 function update_LEDs_confirm()
     if confirm_what ~= nil then
         LED("play_up", GREEN)
@@ -332,6 +383,9 @@ function update_LEDs()
     elseif page == 2 then
         -- NTS patches
         update_LEDs_synth_patch()
+    elseif page == 3 then
+        -- fluidsynth patches
+        update_LEDs_fluid()
     else
         LED("play_up", ORANGE)
         LED("play_down", ORANGE)
@@ -848,11 +902,70 @@ function pad_14_2(on_off) patch("14", on_off) end
 function pad_15_2(on_off) patch("15", on_off) end
 function pad_16_2(on_off) patch("16", on_off) end
 
+function current_GM_category()
+    local cat = 1
+    while GM_CATEGORIES[cat] < fluidsynth_PC do
+        cat = cat + 1
+    end
+    return cat
+end
+
+function fluid(pad, on_off)
+    if on_off == 1 then
+        LED("pad_"..pad, YELLOW)
+    else
+        -- MIDI GM goes from 1 to 127 but Fluidsynth and the font from 0 to 127
+        local changed = false
+        if pad == "05" then
+            -- decrement category
+            local cat = current_GM_category()
+            if cat > 1 then
+                cat = cat - 1
+                fluidsynth_PC = GM_CATEGORIES[cat]
+                changed = true
+            end
+            LED("pad_"..pad, RED)
+        elseif pad == "06" then
+            -- increment category
+            local cat = current_GM_category()
+            if cat < #GM_CATEGORIES then
+                cat = cat + 1
+                fluidsynth_PC = GM_CATEGORIES[cat]
+                changed = true
+            end
+            LED("pad_"..pad, GREEN)
+        elseif pad == "07" then
+            -- decrement PC
+            if fluidsynth_PC > 0 then
+                fluidsynth_PC = fluidsynth_PC - 1
+                changed = true
+            end
+            LED("pad_"..pad, ORANGE)
+        elseif pad == "08" then
+            -- increment PC
+            if fluidsynth_PC < 127 then
+                fluidsynth_PC = fluidsynth_PC + 1
+                changed = true
+            end
+            LED("pad_"..pad, APPLE)
+        end
+        if changed then
+            pc(CHAN_FLUID, fluidsynth_PC)
+            print("PC to Fluidsynth:", fluidsynth_PC)
+        end
+    end
+end
+
+function pad_05_3(on_off) fluid("05", on_off) end
+function pad_06_3(on_off) fluid("06", on_off) end
+function pad_07_3(on_off) fluid("07", on_off) end
+function pad_08_3(on_off) fluid("08", on_off) end
+
 function on_note(on_off, chan, note, velo)
-    if chan == 1 then
-        -- chan 1(2) is from the Launchkey in normal mode, or the keys
-        -- these notes are for the NTS and are meant to be bass notes
-        -- except for the highest on the keyboard: drum sounds
+    if chan == 1 or chan == 2 then
+        -- chan 1(2) or 2(3) is from the Launchkey in normal mode, or the keys.
+        -- These notes are for the NTS or Fluidsynth (resp.) and are meant to
+        -- be bass notes, except for the highest on the keyboard: drum sounds.
         if drums_mode then
             if note == 68 then      -- HH
                 note_on_off(on_off, CHAN_drums, NOTE_HH,   velo);
@@ -935,6 +1048,7 @@ function on_pc(chan, val)
         incontrol()
         panic()  -- includes update_LEDs()
         melody_up()
+        pc(CHAN_FLUID, fluidsynth_PC)
     else
         -- forward
         pc(chan, val)
