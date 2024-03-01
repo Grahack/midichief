@@ -330,7 +330,7 @@ function update_LEDs()
         update_LEDs_synth_patch()
         update_LEDs_synth()
     elseif page == 2 then
-        -- patches
+        -- NTS patches
         update_LEDs_synth_patch()
     else
         LED("play_up", ORANGE)
