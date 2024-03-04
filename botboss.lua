@@ -801,7 +801,6 @@ end
 
 function cancel(value)
     if value == 0 then  -- release
-        print(confirm_what)
         if confirm_what == "save patch" then
             save_color = 1
         end
