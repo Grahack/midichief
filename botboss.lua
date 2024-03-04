@@ -845,6 +845,7 @@ end
 
 function patch(pad, on_off)
     if confirm_what == "save patch" and save_pad ~= pad then return end
+    if confirm_what then return end
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
         pressed[pad] = os.time()
