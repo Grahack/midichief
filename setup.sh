@@ -55,7 +55,7 @@ $SM --out $FLUID_PORT --control-change 0 7 0    # chan 0(1) (InControl)
 $SM --out $FLUID_PORT --control-change 1 7 0    # chan 1(2) (NTS)
 # Let's boost Fluidsynth's drums
 $SM --out $FLUID_PORT --control-change 9 7 127
-# alert MIDI Chief that everything is OK
+# notify MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
 log "Ready at $(date +%T)"
 check_running
