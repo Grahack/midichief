@@ -565,11 +565,8 @@ function pad_01_1(on_off)
         local halt_release = os.time()
         if halt_release - halt_press >= 2 then
             LED("pad_01", RED)
-            print("HALT")
-            melody_down(CHAN_FLUID)
-            melody_down(CHAN_NTS)
-            LED("pad_01", BLACK)
-            os.execute("sudo halt")
+            confirm_what = "halt"
+            update_LEDs_confirm()
         else
             LED("pad_01", GREEN)
             BPM = 60
@@ -793,6 +790,12 @@ function confirm(value)
             save_patch(save_filename)
             save_pad = pad
             save_color = 1
+        elseif confirm_what == "halt" then
+            print("HALT")
+            melody_down(CHAN_FLUID)
+            melody_down(CHAN_NTS)
+            LED("pad_01", BLACK)
+            os.execute("sudo halt")
         end
         confirm_what = nil
         update_LEDs()
@@ -803,6 +806,8 @@ function cancel(value)
     if value == 0 then  -- release
         if confirm_what == "save patch" then
             save_color = 1
+        elseif confirm_what == "halt" then
+            -- nothing to do
         end
         confirm_what = nil
         update_LEDs()
