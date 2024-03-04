@@ -40,6 +40,7 @@ check_running() {
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
 fluidsynth -i --server --gain 5 --audio-driver=alsa \
+           --sample-rate 48000.000 \
            -o audio.alsa.device=hw:$NUM_SOUNDCARD \
            $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
