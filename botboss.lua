@@ -360,10 +360,12 @@ function update_LEDs()
         update_LEDs_visual_BPM()
         update_LEDs_BPM()
         -- right side of the page
-        local pad_ids = {"06", "07", "13", "14", "15", "16"}
-        for _, pad in pairs(pad_ids) do
-            LED("pad_"..pad, BLACK)
-        end
+        LED("pad_06", RED)
+        LED("pad_07", GREEN)
+        LED("pad_13", ORANGE)
+        LED("pad_14", RED)
+        LED("pad_15", GREEN)
+        LED("pad_16", APPLE)
     elseif page == 1 then
         -- admin and synth
         LED("pad_01", GREEN)
