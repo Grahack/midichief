@@ -970,7 +970,7 @@ function pad_07_3(on_off) fluid("07", on_off) end
 function pad_08_3(on_off) fluid("08", on_off) end
 
 function on_note(on_off, chan, note, velo)
-    if chan == 1 or chan == 2 then
+    if chan == CHAN_NTS or chan == CHAN_FLUID then
         -- chan 1(2) or 2(3) is from the Launchkey in normal mode, or the keys.
         -- These notes are for the NTS or Fluidsynth (resp.) and are meant to
         -- be bass notes, except for the highest on the keyboard: drum sounds.
