@@ -4,7 +4,7 @@ print("BotBoss Lua definitions")
 local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
 local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
 local CHAN_NTS = 1 -- NTS channel
-local CHAN_FLUID = 2 -- Fluidsynth channel
+local CHAN_FLUID = 3 -- Fluidsynth channel
 local CHAN_drums = 9
 local DUMMY_CC = 127
 local NOTE_HH   = 42
