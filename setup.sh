@@ -39,8 +39,14 @@ check_running() {
 
 log "Setting up at $(date +%T)"
 stdbuf -oL $MC_DIR/midichief $MC_DIR/botboss.lua >> $LOG 2>&1 &
+# https://raspberrypi.stackexchange.com/questions/14987/midi-keyboard-latency-with-fluidsynth
+# -c=NUM  (number of audio buffers, default 16)
+# -z=SIZE (buffer size, default 64)
+# TODO: https://www.dhpiggott.net/2021/03/19/running-fluidsynth-on-a-raspberry-pi-4/
 fluidsynth -i --server --gain 2 --audio-driver=alsa \
            --sample-rate 48000.000 \
+           --audio-bufcount=2 \
+           --audio-bufsize=32 \
            -o audio.alsa.device=hw:$NUM_SOUNDCARD \
            $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
