@@ -437,8 +437,8 @@ end
 
 function incontrol()
     -- set the Launchkey in its InControl mode
-    -- 1 for on, 0 for chan 0(1), note 12 and velo 127
-    note_on_off(1, 0, 12, 127)
+    -- 1 for on, CHAN_LK, note 12 and velo 127
+    note_on_off(1, CHAN_LK, 12, 127)
 end
 
 function pad_05_0(on_off)
@@ -997,8 +997,7 @@ function on_note(on_off, chan, note, velo)
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             end
         end
-    elseif chan == 0 then
-        -- chan 0(1) is from the Launchkey in InControl mode
+    elseif chan == CHAN_LK then
         local prefix = n_fns[note]
         if prefix == nil then
             print("No prefix to handle this note:", note, "(InControl mode)")
@@ -1033,8 +1032,7 @@ function on_note(on_off, chan, note, velo)
 end
 
 function on_cc(chan, param, val)
-    if chan == 0 then
-        -- chan 0(1) is from the Launchkey in InControl mode
+    if chan == CHAN_LK then
         local prefix = cc_fns[param]
         if prefix == nil then
             print("No prefix to handle this CC:", param, "(InControl mode)")
