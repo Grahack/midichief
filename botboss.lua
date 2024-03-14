@@ -492,7 +492,7 @@ function pad_06_0(on_off)
     if on_off == 1 then
         LED("pad_06", YELLOW)
     else
-        LED("pad_06", BLACK)
+        LED("pad_06", RED)
         if BPM % 2 == 0 then
             local bpm = BPM_int(BPM/2)
             if bpm >= 10 then
@@ -510,7 +510,7 @@ function pad_07_0(on_off)
     if on_off == 1 then
         LED("pad_07", YELLOW)
     else
-        LED("pad_07", BLACK)
+        LED("pad_07", GREEN)
         local bpm = BPM_int(BPM*2)
         if bpm <= 250 then
             BPM = bpm
@@ -525,7 +525,11 @@ function increment(pad, on_off)
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
     else
-        LED("pad_"..pad, BLACK)
+        local colors = {["13"]= ORANGE,
+                        ["14"]= RED,
+                        ["15"]= GREEN,
+                        ["16"]= APPLE}
+        LED("pad_"..pad, colors[pad])
         local bpm = BPM + PADS_click_modif[pad]
         if 10 <= bpm and bpm <= 250 then
             BPM = bpm
