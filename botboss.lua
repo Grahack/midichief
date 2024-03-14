@@ -23,6 +23,7 @@ local YELLOW = 13
 local GREEN = 123
 local APPLE = 75
 local ORANGE = 9
+local BLUE = 37
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 local patch_colors = {RED, ORANGE, YELLOW, APPLE}
 -- synth
@@ -403,7 +404,7 @@ end
 function update_LEDs_BPM()
     for i, b in ipairs(BPM_bits) do
         if b > 0 then
-            LED("pad_"..PADS_click[i], APPLE)
+            LED("pad_"..PADS_click[i], BLUE)
         else
             LED("pad_"..PADS_click[i], BLACK)
         end
@@ -415,7 +416,7 @@ function update_LEDs_synth_type()
     local num_type = synth_cur_type[key]
     for i, b in ipairs(bits4(num_type)) do
         if b > 0 then
-            LED("pad_"..PADS_synth[i], YELLOW)
+            LED("pad_"..PADS_synth[i], BLUE)
         else
             LED("pad_"..PADS_synth[i], BLACK)
         end
