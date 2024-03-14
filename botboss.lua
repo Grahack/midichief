@@ -2,7 +2,11 @@ print("BotBoss Lua definitions")
 
 -- CONSTANTS
 local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
-local CHAN_LK = 0  -- the channel at which the Launchkey listens (InControl)
+-- Channels for the Launchkey
+local CHAN_LK_DAW = 15 -- set in DAW mode
+local CHAN_LK_LEDs = 0 -- light the LEDs in static mode
+local CHAN_LK = 0    -- in DAW mode the LK sends events to this chan
+local CHAN_LK2 = 15  -- but also to this one
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_FLUID = 3 -- Fluidsynth channel
 local CHAN_drums = 9
@@ -12,13 +16,13 @@ local NOTE_KICK = 36
 local NOTE_SN   = 40
 local NOTE_O_HH = 46
 local NOTE_CRASH = 49
--- constants for LED colors (Launchkey in InControl mode)
+-- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
-local RED = 1
-local YELLOW = 17
-local GREEN = 16
-local APPLE = 49
-local ORANGE = 19
+local RED = 5
+local YELLOW = 13
+local GREEN = 123
+local APPLE = 75
+local ORANGE = 9
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 local patch_colors = {RED, ORANGE, YELLOW, APPLE}
 -- synth
@@ -120,11 +124,13 @@ PADS_click_modif["15"] =   5
 PADS_click_modif["16"] =   1
 -- Pad numbers for binary display of synth types
 local PADS_synth = {"16", "15", "14", "13"}
--- Codes for MIDI notes or CC sent by the Launchkey (InControl mode, decimal)
+-- Codes for MIDI notes or CC sent by the Launchkey (DAW mode, decimal)
 local cc_fns = {}  -- buttons which send control change events
 local n_fns = {}   -- buttons which send note events
 cc_fns[106] = "track_L"
 cc_fns[107] = "track_R"
+cc_fns[103] = "play"
+cc_fns[102] = "rec"
 cc_fns[21] = "pot_1"
 cc_fns[22] = "pot_2"
 cc_fns[23] = "pot_3"
@@ -233,7 +239,7 @@ function click()
     end
 end
 
-function track_R_0(value)
+function scene_up_0(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 1
@@ -241,7 +247,7 @@ function track_R_0(value)
     end
 end
 
-function track_R_1(value)
+function scene_up_1(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 2
@@ -249,7 +255,7 @@ function track_R_1(value)
     end
 end
 
-function track_R_2(value)
+function scene_up_2(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 3
@@ -257,7 +263,7 @@ function track_R_2(value)
     end
 end
 
-function track_L_1(value)
+function scene_down_1(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 0
@@ -265,7 +271,7 @@ function track_L_1(value)
     end
 end
 
-function track_L_2(value)
+function scene_down_2(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 1
@@ -273,7 +279,7 @@ function track_L_2(value)
     end
 end
 
-function track_L_3(value)
+function scene_down_3(value)
     if confirm_what then return end
     if value == 0 then  -- on release
         page = 2
@@ -282,8 +288,8 @@ function track_L_3(value)
 end
 
 function LED(where, color)
-    note_on_off(0, CHAN_LK, LED_map[where], color)
-    note_on_off(1, CHAN_LK, LED_map[where], color)
+    note_on_off(0, CHAN_LK_LEDs, LED_map[where], color)
+    note_on_off(1, CHAN_LK_LEDs, LED_map[where], color)
 end
 
 function update_LEDs_visual_BPM()
@@ -435,10 +441,10 @@ function sleep(n)
     os.execute("sleep " .. (n/1000))
 end
 
-function incontrol()
-    -- set the Launchkey in its InControl mode
-    -- 1 for on, CHAN_LK, note 12 and velo 127
-    note_on_off(1, CHAN_LK, 12, 127)
+function DAW_mode()
+    -- set the Launchkey in its DAW mode
+    -- 1 for on, CHAN_LK_DAW, note 12 and velo 127
+    note_on_off(1, CHAN_LK_DAW, 12, 127)
 end
 
 function pad_05_0(on_off)
@@ -699,7 +705,7 @@ function send_synth_type()
     current_patch[tostring(param)] = value
 end
 
-function scene_up_1(value)
+function rec_1(value)
     if confirm_what then return end
     -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
@@ -713,7 +719,7 @@ function scene_up_1(value)
     end
 end
 
-function scene_down_1(value)
+function play_1(value)
     if confirm_what then return end
     -- change type of synth OSC FILT EG MOD DELAY REV
     if value == 0 then  -- release
@@ -974,7 +980,14 @@ function pad_07_3(on_off) fluid("07", on_off) end
 function pad_08_3(on_off) fluid("08", on_off) end
 
 function on_note(on_off, chan, note, velo)
-    if chan == CHAN_NTS or chan == CHAN_FLUID then
+    if velo == 0 then
+        -- LK MK3 releases with note ON and velocity 0!
+        on_off = 0
+    end
+    if chan == CHAN_LK_DAW then
+        -- handle the several channels of the LK mk3!
+        on_note(on_off, chan_LK, note, velo)
+    elseif chan == CHAN_NTS or chan == CHAN_FLUID then
         -- chan 1(2) or 2(3) is from the Launchkey in normal mode, or the keys.
         -- These notes are for the NTS or Fluidsynth (resp.) and are meant to
         -- be bass notes, except for the highest on the keyboard: drum sounds.
@@ -1004,12 +1017,12 @@ function on_note(on_off, chan, note, velo)
     elseif chan == CHAN_LK then
         local prefix = n_fns[note]
         if prefix == nil then
-            print("No prefix to handle this note:", note, "(InControl mode)")
+            print("No prefix to handle this note:", note, "(DAW mode)")
         else
             local f_name = prefix .. "_" .. page
             local f = _G[f_name]
             if f == nil then
-                print("No fn to handle a note:", f_name, "(InControl mode)")
+                print("No fn to handle a note:", f_name, "(DAW mode)")
             else
                 f(on_off)  -- velocity is useless (127 for on and 0 for off)
             end
@@ -1036,15 +1049,16 @@ function on_note(on_off, chan, note, velo)
 end
 
 function on_cc(chan, param, val)
-    if chan == CHAN_LK then
+    -- LK uses different channels!
+    if chan == CHAN_LK or chan == CHAN_LK2 then
         local prefix = cc_fns[param]
         if prefix == nil then
-            print("No prefix to handle this CC:", param, "(InControl mode)")
+            print("No prefix to handle this CC:", param, "(DAW mode)")
         else
             local f_name = prefix .. "_" .. page
             local f = _G[f_name]
             if f == nil then
-                print("No fn to handle a CC:", f_name, "(InControl mode)")
+                print("No fn to handle a CC:", f_name, "(DAW mode)")
             else
                 f(val)
             end
@@ -1055,7 +1069,7 @@ end
 function on_pc(chan, val)
     if chan == 15 and val == 127 then
         -- startup
-        incontrol()
+        DAW_mode()
         panic()  -- includes update_LEDs()
         melody_up(CHAN_FLUID)
         melody_up(CHAN_NTS)
