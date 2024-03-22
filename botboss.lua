@@ -555,7 +555,7 @@ function pad_08_0(on_off)
     if confirm_what then return end
     -- tap tempo
     if on_off == 1 then
-        LED("pad_08", RED)
+        LED("pad_08", BLUE)
         local old_BPM = BPM
         BPM = tap()
         if BPM ~= old_BPM then  -- midichief.c only allows BPM >= 30
