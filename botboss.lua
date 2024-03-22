@@ -1028,7 +1028,7 @@ function on_note(on_off, chan, note, velo)
                 f(on_off)  -- velocity is useless (127 for on and 0 for off)
             end
         end
-    elseif chan == 9 then
+    elseif chan == CHAN_drums then
         -- a tweak for my electronic drums
         -- keyboard pads are:
         -- 24 36 C1  kick
@@ -1036,12 +1036,12 @@ function on_note(on_off, chan, note, velo)
         -- 26 38 D1  snare
         -- I need to translate snare 26 38 to kick 24 36
         if note == 38 then
-            note_on_off(on_off, 9, 36, velo);
+            note_on_off(on_off, CHAN_drums, 36, velo);
         -- and to translate HH 2e 46 to HH 2a 42
         elseif note == 46 then
-            note_on_off(on_off, 9, 42, velo);
+            note_on_off(on_off, CHAN_drums, 42, velo);
         else
-            note_on_off(on_off, chan, note, velo);
+            note_on_off(on_off, CHAN_drums, note, velo);
         end
     else
         -- forward
