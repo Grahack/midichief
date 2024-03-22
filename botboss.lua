@@ -995,12 +995,12 @@ function on_note(on_off, chan, note, velo)
         if drums_mode then
             if note == 68 then      -- HH
                 note_on_off(on_off, CHAN_drums, NOTE_HH,   velo);
-            elseif note == 70 then  -- kick
-                note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
+            elseif note == 70 then  -- open HH
+                note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
             elseif note == 72 then  -- snare
                 note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
-            elseif note == 71 then  -- open HH
-                note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
+            elseif note == 71 then  -- kick
+                note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 69 then  -- crash
                 note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
             else
