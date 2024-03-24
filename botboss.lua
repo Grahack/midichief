@@ -1085,10 +1085,16 @@ function on_cc(chan, param, val)
             end
         end
     -- KICK with the sustain pedal
-    elseif param == 64 and val == 127 then  -- KICK
-        note_on_off(1, CHAN_drums, NOTE_KICK, 100);
-    elseif param == 64 and val == 0 then    -- KICK
-        note_on_off(0, CHAN_drums, NOTE_KICK, 0);
+    elseif chan == CHAN_NTS or chan == CHAN_FLUID then
+        if param == 64 and val == 127 then  -- KICK
+            note_on_off(1, CHAN_drums, NOTE_KICK, 100);
+        elseif param == 64 and val == 0 then    -- KICK
+            note_on_off(0, CHAN_drums, NOTE_KICK, 0);
+        else
+            cc(chan, param, val)
+        end
+    else
+        cc(chan, param, val)
     end
 end
 
