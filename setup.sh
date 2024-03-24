@@ -62,8 +62,6 @@ FLUID_PORT=$($LS | grep FLUID | cut -d' ' -f3)
 $SM --out $FLUID_PORT --control-change 0 7 0    # chan 0(1) (LK DAW mode)
 $SM --out $FLUID_PORT --control-change 1 7 0    # chan 1(2) (NTS)
 $SM --out $FLUID_PORT --control-change 15 7 0    # chan 0(1) (LK DAW mode)
-# Let's boost Fluidsynth's drums
-$SM --out $FLUID_PORT --control-change 9 7 127
 # notify MIDI Chief that everything is OK
 $SM --out "MIDI Chief ALSA client:listen:in" --program-change 15 127
 log "Ready at $(date +%T)"
