@@ -5,6 +5,7 @@ local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
 -- Channels for the Launchkey
 local CHAN_LK_DAW = 15 -- set in DAW mode
 local CHAN_LK_LEDs = 0 -- light the LEDs in static mode
+local CHAN_LK_LEDs2 = 15 -- light the white LEDs in static mode
 local CHAN_LK = 0    -- in DAW mode the LK sends events to this chan
 local CHAN_LK2 = 15  -- but also to this one
 local CHAN_NTS = 1 -- NTS channel
@@ -81,7 +82,9 @@ local synth_max_type = {["1_05"] = 5, ["1_06"] = 7, ["1_07"] = 5,
 -- Display constants
 local LED_map = {}
 LED_map["play_up"]   = 104
-LED_map["play_down"] = 120
+LED_map["play_down"] = 105
+LED_map["play"] = 115
+LED_map["rec"]  = 117
 LED_map["pad_01"] =  96
 LED_map["pad_02"] =  97
 LED_map["pad_03"] =  98
@@ -156,10 +159,10 @@ n_fns[116] = "pad_13"
 n_fns[117] = "pad_14"
 n_fns[118] = "pad_15"
 n_fns[119] = "pad_16"
-n_fns[104] = "play_up"
-n_fns[120] = "play_down"
-cc_fns[104] = "scene_up"
-cc_fns[105] = "scene_down"
+cc_fns[104] = "play_up"
+cc_fns[105] = "play_down"
+cc_fns[115] = "play"
+cc_fns[117] = "rec"
 -- MIDI GM categories (but our values should be one less
 --   1 -   8  Keys
 --   9 -  16  Chrom. Perc.
@@ -311,6 +314,10 @@ function LED(where, color)
     note_on_off(1, CHAN_LK_LEDs, LED_map[where], color)
 end
 
+function LED2(where, level)
+    cc(CHAN_LK_LEDs2, LED_map[where], level)
+end
+
 function update_LEDs_visual_BPM()
     if click_lit then
         LED("pad_08", BLUE)
@@ -369,11 +376,11 @@ end
 
 function update_LEDs_confirm()
     if confirm_what ~= nil then
-        LED("play_up", GREEN)
-        LED("play_down", RED)
+        LED2("play_up", 127)
+        LED2("play_down", 127)
     else
-        LED("play_up", BLACK)
-        LED("play_down", BLACK)
+        LED2("play_up", 0)
+        LED2("play_down", 0)
     end
 end
 
@@ -414,8 +421,8 @@ function update_LEDs()
         -- fluidsynth patches
         update_LEDs_fluid()
     else
-        LED("play_up", ORANGE)
-        LED("play_down", ORANGE)
+        LED2("play_up", 64)
+        LED2("play_down", 64)
     end
 end
 
