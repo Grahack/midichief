@@ -55,6 +55,8 @@ connect_ALSA "MIDI Chief":1 "Launchkey":1
 connect_ALSA "pisound":0 "MIDI Chief":0
 connect_ALSA "MIDI Chief":1 "pisound":0
 connect_ALSA "MIDI Chief":1 "FLUID Synth":0
+# optionnaly connect the second keyboard
+aconnect "Keystation":0 "MIDI Chief":0
 # Let's silence Fluidsynth on some channels
 FLUID_PORT=$($LS | grep FLUID | cut -d' ' -f3)
 $SM --out $FLUID_PORT --control-change 0 7 0    # chan 0(1) (LK DAW mode)
