@@ -240,48 +240,66 @@ function click()
     end
 end
 
-function scene_up_0(value)
-    if confirm_what then return end
+function play_up_0(value)
+    if confirm_what then
+        confirm(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 1
         update_LEDs()
     end
 end
 
-function scene_up_1(value)
-    if confirm_what then return end
+function play_up_1(value)
+    if confirm_what then
+        confirm(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 2
         update_LEDs()
     end
 end
 
-function scene_up_2(value)
-    if confirm_what then return end
+function play_up_2(value)
+    if confirm_what then
+        confirm(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 3
         update_LEDs()
     end
 end
 
-function scene_down_1(value)
-    if confirm_what then return end
+function play_down_1(value)
+    if confirm_what then
+        cancel(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 0
         update_LEDs()
     end
 end
 
-function scene_down_2(value)
-    if confirm_what then return end
+function play_down_2(value)
+    if confirm_what then
+        cancel(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 1
         update_LEDs()
     end
 end
 
-function scene_down_3(value)
-    if confirm_what then return end
+function play_down_3(value)
+    if confirm_what then
+        cancel(value)
+        return
+    end
     if value == 0 then  -- on release
         page = 2
         update_LEDs()
@@ -826,11 +844,6 @@ function cancel(value)
         update_LEDs()
     end
 end
-
-function play_down_1(value) cancel(value) end
-function play_down_2(value) cancel(value) end
-function play_up_1(value) confirm(value) end
-function play_up_2(value) confirm(value) end
 
 function patch_filename(the_pad, the_page)
     return FILE_PREFIX .. "pad_"..the_pad.."_"..the_page..".btbs"
