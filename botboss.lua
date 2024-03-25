@@ -440,7 +440,7 @@ function update_LEDs_synth_type()
     local num_type = synth_cur_type[key]
     for i, b in ipairs(bits4(num_type)) do
         if b > 0 then
-            LED("pad_"..PADS_synth[i], BLUE)
+            LED("pad_"..PADS_synth[i], PINK)
         else
             LED("pad_"..PADS_synth[i], BLACK)
         end
