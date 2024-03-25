@@ -5,8 +5,8 @@ local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
 -- PAGES
 PAGE_BPM = 0
 PAGE_ADMIN_AND_NTS = 1
-PAGE_NTS_VAULT = 2
-PAGE_FLUID = 3
+PAGE_FLUID = 2
+PAGE_NTS_VAULT = 3
 -- Channels for the Launchkey
 local CHAN_LK_DAW = 15 -- set in DAW mode
 local CHAN_LK_LEDs = 0 -- light the LEDs in static mode
@@ -400,12 +400,12 @@ function update_LEDs()
         LED("pad_04", BLACK)
         update_LEDs_synth_patch()
         update_LEDs_synth()
-    elseif page == PAGE_NTS_VAULT then
-        -- NTS patches
-        update_LEDs_synth_patch()
     elseif page == PAGE_FLUID then
         -- fluidsynth patches
         update_LEDs_fluid()
+    elseif page == PAGE_NTS_VAULT then
+        -- NTS patches
+        update_LEDs_synth_patch()
     else
         LED2("play_up", 64)
         LED2("play_down", 64)
@@ -906,22 +906,22 @@ function pad_09_1(on_off) patch("09", on_off) end
 function pad_10_1(on_off) patch("10", on_off) end
 function pad_11_1(on_off) patch("11", on_off) end
 function pad_12_1(on_off) patch("12", on_off) end
-function pad_01_2(on_off) patch("01", on_off) end
-function pad_02_2(on_off) patch("02", on_off) end
-function pad_03_2(on_off) patch("03", on_off) end
-function pad_04_2(on_off) patch("04", on_off) end
-function pad_05_2(on_off) patch("05", on_off) end
-function pad_06_2(on_off) patch("06", on_off) end
-function pad_07_2(on_off) patch("07", on_off) end
-function pad_08_2(on_off) patch("08", on_off) end
-function pad_09_2(on_off) patch("09", on_off) end
-function pad_10_2(on_off) patch("10", on_off) end
-function pad_11_2(on_off) patch("11", on_off) end
-function pad_12_2(on_off) patch("12", on_off) end
-function pad_13_2(on_off) patch("13", on_off) end
-function pad_14_2(on_off) patch("14", on_off) end
-function pad_15_2(on_off) patch("15", on_off) end
-function pad_16_2(on_off) patch("16", on_off) end
+function pad_01_3(on_off) patch("01", on_off) end
+function pad_02_3(on_off) patch("02", on_off) end
+function pad_03_3(on_off) patch("03", on_off) end
+function pad_04_3(on_off) patch("04", on_off) end
+function pad_05_3(on_off) patch("05", on_off) end
+function pad_06_3(on_off) patch("06", on_off) end
+function pad_07_3(on_off) patch("07", on_off) end
+function pad_08_3(on_off) patch("08", on_off) end
+function pad_09_3(on_off) patch("09", on_off) end
+function pad_10_3(on_off) patch("10", on_off) end
+function pad_11_3(on_off) patch("11", on_off) end
+function pad_12_3(on_off) patch("12", on_off) end
+function pad_13_3(on_off) patch("13", on_off) end
+function pad_14_3(on_off) patch("14", on_off) end
+function pad_15_3(on_off) patch("15", on_off) end
+function pad_16_3(on_off) patch("16", on_off) end
 
 function current_GM_category()
     local cat = 1
@@ -977,10 +977,10 @@ function fluid(pad, on_off)
     end
 end
 
-function pad_05_3(on_off) fluid("05", on_off) end
-function pad_06_3(on_off) fluid("06", on_off) end
-function pad_07_3(on_off) fluid("07", on_off) end
-function pad_08_3(on_off) fluid("08", on_off) end
+function pad_05_2(on_off) fluid("05", on_off) end
+function pad_06_2(on_off) fluid("06", on_off) end
+function pad_07_2(on_off) fluid("07", on_off) end
+function pad_08_2(on_off) fluid("08", on_off) end
 
 function on_note(on_off, chan, note, velo)
     if velo == 0 then
