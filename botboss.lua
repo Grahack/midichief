@@ -1012,7 +1012,7 @@ function on_note(on_off, chan, note, velo)
     end
     if chan == CHAN_LK_DAW then
         -- handle the several channels of the LK mk3!
-        on_note(on_off, chan_LK, note, velo)
+        on_note(on_off, CHAN_LK, note, velo)
     elseif chan == CHAN_NTS or chan == CHAN_FLUID then
         -- chan 1(2) or 2(3) is from the Launchkey in normal mode, or the keys.
         -- These notes are for the NTS or Fluidsynth (resp.) and are meant to
