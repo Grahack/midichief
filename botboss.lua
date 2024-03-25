@@ -35,7 +35,8 @@ local PINK = 53
 local INDIGO = 79
 local PURPLE = 81
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
-local patch_colors = {RED, ORANGE, YELLOW, APPLE}
+local patch_colors = {RED, ORANGE, YELLOW, APPLE, GREEN,
+                      BLUE, PINK, PURPLE, INDIGO}
 -- synth
 --     OSC      53  FILT     42  EG      14  MOD   88    DELAY 89  REV   90
 -- A   SHAPE    54  CUTOFF   43  ATTACK  16  SPEED 28    TIME  30  TIME  34
