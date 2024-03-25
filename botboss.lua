@@ -141,6 +141,12 @@ PADS_modif["03"] =  -5
 PADS_modif["04"] =   5
 PADS_modif["05"] =  -1
 PADS_modif["06"] =   1
+-- Pad numbers for binary display of Fluidsynth's program
+local PADS_fluid = {"16", "15", "14", "13", "12", "11", "10", "09"}
+local PC_INCREMENT_COLORS = {["05"]= RED,
+                             ["06"]= GREEN,
+                             ["07"]= ORANGE,
+                             ["08"]= APPLE}
 -- Pad numbers for binary display of synth types
 local PADS_synth = {"16", "15", "14", "13"}
 -- Codes for MIDI notes or CC sent by the Launchkey (DAW mode, decimal)
@@ -239,6 +245,7 @@ local save_pad = nil
 local save_color = 1
 -- Fluidsynth
 local fluidsynth_PC = 32  -- the first GM bass sound
+local fluidsynth_PC_bits = {0, 0, 0, 0, 0, 1, 0, 0}  -- this is 32 too
 
 function click()
     print("BPM=", BPM)
@@ -349,15 +356,20 @@ function update_LEDs_synth_patch()
 end
 
 function update_LEDs_fluid()
-    local pads = {"01", "02", "03", "04",
-                  "09", "10", "11", "12","13", "14", "15", "16"}
+    local pads = {"01", "02", "03", "04"}
     for _, pad in ipairs(pads) do
         LED("pad_"..pad, BLACK)
     end
-    LED("pad_05", RED)
-    LED("pad_06", GREEN)
-    LED("pad_07", ORANGE)
-    LED("pad_08", APPLE)
+    for pad, color in pairs(PC_INCREMENT_COLORS) do
+        LED("pad_"..pad, color)
+    end
+    for i, b in ipairs(fluidsynth_PC_bits) do
+        if b > 0 then
+            LED("pad_"..PADS_fluid[i], PINK)
+        else
+            LED("pad_"..PADS_fluid[i], BLACK)
+        end
+    end
 end
 
 function update_LEDs_confirm()
@@ -970,6 +982,8 @@ function fluid(pad, on_off)
         if changed then
             pc(CHAN_FLUID, fluidsynth_PC)
             print("PC to Fluidsynth:", fluidsynth_PC)
+            fluidsynth_PC_bits = bits8(fluidsynth_PC)
+            update_LEDs_fluid()
         end
     end
 end
@@ -978,6 +992,36 @@ function pad_05_2(on_off) fluid("05", on_off) end
 function pad_06_2(on_off) fluid("06", on_off) end
 function pad_07_2(on_off) fluid("07", on_off) end
 function pad_08_2(on_off) fluid("08", on_off) end
+
+function PC_bin_modif(on_off, pad)
+    if confirm_what then return end
+    if on_off == 1 then return end  -- continue only if the button is released
+    local bit_num = PADS_bit_num[pad]
+    local modif = PADS_modif[pad]
+    if fluidsynth_PC_bits[bit_num] > 0 then
+        if fluidsynth_PC - modif >= 0 then
+            fluidsynth_PC = fluidsynth_PC - modif
+            fluidsynth_PC_bits[bit_num] = 0
+        end
+    else
+        if fluidsynth_PC + modif <= 127 then
+            fluidsynth_PC = fluidsynth_PC + modif
+            fluidsynth_PC_bits[bit_num] = 1
+        end
+    end
+    pc(CHAN_FLUID, fluidsynth_PC)
+    print("PC to Fluidsynth:", fluidsynth_PC)
+    update_LEDs_fluid()
+end
+
+function pad_09_2(on_off) PC_bin_modif(on_off, "09") end
+function pad_10_2(on_off) PC_bin_modif(on_off, "10") end
+function pad_11_2(on_off) PC_bin_modif(on_off, "11") end
+function pad_12_2(on_off) PC_bin_modif(on_off, "12") end
+function pad_13_2(on_off) PC_bin_modif(on_off, "13") end
+function pad_14_2(on_off) PC_bin_modif(on_off, "14") end
+function pad_15_2(on_off) PC_bin_modif(on_off, "15") end
+function pad_16_2(on_off) PC_bin_modif(on_off, "16") end
 
 function on_note(on_off, chan, note, velo)
     if velo == 0 then
