@@ -2,6 +2,11 @@ print("BotBoss Lua definitions")
 
 -- CONSTANTS
 local FILE_PREFIX = "/home/chri/botboss/midichief/patches/"
+-- PAGES
+PAGE_BPM = 0
+PAGE_ADMIN_AND_NTS = 1
+PAGE_NTS_VAULT = 2
+PAGE_FLUID = 3
 -- Channels for the Launchkey
 local CHAN_LK_DAW = 15 -- set in DAW mode
 local CHAN_LK_LEDs = 0 -- light the LEDs in static mode
@@ -314,9 +319,9 @@ end
 
 function update_LEDs_synth_patch()
     local pads = {}
-    if page == 1 then
+    if page == PAGE_ADMIN_AND_NTS then
         pads = {"09", "10", "11", "12"}
-    elseif page == 2 then
+    elseif page == PAGE_NTS_VAULT then
         pads = {"01", "02", "03", "04","05", "06", "07", "08",
                 "09", "10", "11", "12","13", "14", "15", "16"}
     end
@@ -366,7 +371,7 @@ end
 
 function update_LEDs()
     update_LEDs_confirm()
-    if page == 0 then
+    if page == PAGE_BPM then
         -- top side of the page
         for pad, color in pairs(BPM_MULT_COLORS) do
             LED("pad_"..pad, color)
@@ -379,7 +384,7 @@ function update_LEDs()
         update_LEDs_visual_BPM()
         -- BPM binary display
         update_LEDs_BPM()
-    elseif page == 1 then
+    elseif page == PAGE_ADMIN_AND_NTS then
         -- admin and synth
         LED("pad_01", GREEN)
         if drums_mode then
@@ -395,10 +400,10 @@ function update_LEDs()
         LED("pad_04", BLACK)
         update_LEDs_synth_patch()
         update_LEDs_synth()
-    elseif page == 2 then
+    elseif page == PAGE_NTS_VAULT then
         -- NTS patches
         update_LEDs_synth_patch()
-    elseif page == 3 then
+    elseif page == PAGE_FLUID then
         -- fluidsynth patches
         update_LEDs_fluid()
     else
