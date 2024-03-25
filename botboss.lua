@@ -25,6 +25,9 @@ local GREEN = 123
 local APPLE = 75
 local ORANGE = 9
 local BLUE = 37
+local PINK = 53
+local INDIGO = 79
+local PURPLE = 81
 local click_colors = {BLACK, RED, GREEN, YELLOW}  -- see click_mode
 local patch_colors = {RED, ORANGE, YELLOW, APPLE}
 -- synth
@@ -102,30 +105,35 @@ LED_map["pad_14"] = 117
 LED_map["pad_15"] = 118
 LED_map["pad_16"] = 119
 -- Pad numbers for binary display of BPM
-local PADS_click = {"12", "11", "10", "09", "04", "03", "02", "01"}
+local PADS_click = {"16", "15", "14", "13", "12", "11", "10", "09"}
+local BPM_INCREMENT_COLORS = {["03"]= RED,
+                              ["04"]= GREEN,
+                              ["05"]= ORANGE,
+                              ["06"]= APPLE}
+local BPM_MULT_COLORS = {["01"]= PURPLE, ["02"]= INDIGO}
 -- Modifiers for binary pads
 local PADS_click_bit_num = {}
-PADS_click_bit_num["01"] = 8
-PADS_click_bit_num["02"] = 7
-PADS_click_bit_num["03"] = 6
-PADS_click_bit_num["04"] = 5
-PADS_click_bit_num["09"] = 4
-PADS_click_bit_num["10"] = 3
-PADS_click_bit_num["11"] = 2
-PADS_click_bit_num["12"] = 1
+PADS_click_bit_num["09"] = 8
+PADS_click_bit_num["10"] = 7
+PADS_click_bit_num["11"] = 6
+PADS_click_bit_num["12"] = 5
+PADS_click_bit_num["13"] = 4
+PADS_click_bit_num["14"] = 3
+PADS_click_bit_num["15"] = 2
+PADS_click_bit_num["16"] = 1
 local PADS_click_modif = {}
-PADS_click_modif["01"] = 128
-PADS_click_modif["02"] =  64
-PADS_click_modif["03"] =  32
-PADS_click_modif["04"] =  16
-PADS_click_modif["09"] =   8
-PADS_click_modif["10"] =   4
-PADS_click_modif["11"] =   2
-PADS_click_modif["12"] =   1
-PADS_click_modif["13"] =  -1
-PADS_click_modif["14"] =  -5
-PADS_click_modif["15"] =   5
+PADS_click_modif["09"] = 128
+PADS_click_modif["10"] =  64
+PADS_click_modif["11"] =  32
+PADS_click_modif["12"] =  16
+PADS_click_modif["13"] =   8
+PADS_click_modif["14"] =   4
+PADS_click_modif["15"] =   2
 PADS_click_modif["16"] =   1
+PADS_click_modif["03"] =  -5
+PADS_click_modif["04"] =   5
+PADS_click_modif["05"] =  -1
+PADS_click_modif["06"] =   1
 -- Pad numbers for binary display of synth types
 local PADS_synth = {"16", "15", "14", "13"}
 -- Codes for MIDI notes or CC sent by the Launchkey (DAW mode, decimal)
@@ -387,17 +395,18 @@ end
 function update_LEDs()
     update_LEDs_confirm()
     if page == 0 then
-        -- click
-        LED("pad_05", click_colors[click_mode + 1])
+        -- top side of the page
+        for pad, color in pairs(BPM_MULT_COLORS) do
+            LED("pad_"..pad, color)
+        end
+        for pad, color in pairs(BPM_INCREMENT_COLORS) do
+            LED("pad_"..pad, color)
+        end
+        -- click mode and visual
+        LED("pad_07", click_colors[click_mode + 1])
         update_LEDs_visual_BPM()
+        -- BPM binary display
         update_LEDs_BPM()
-        -- right side of the page
-        LED("pad_06", RED)
-        LED("pad_07", GREEN)
-        LED("pad_13", ORANGE)
-        LED("pad_14", RED)
-        LED("pad_15", GREEN)
-        LED("pad_16", APPLE)
     elseif page == 1 then
         -- admin and synth
         LED("pad_01", GREEN)
@@ -473,13 +482,13 @@ function DAW_mode()
     note_on_off(1, CHAN_LK_DAW, 12, 127)
 end
 
-function pad_05_0(on_off)
+function pad_07_0(on_off)
     if confirm_what then return end
     -- click edit
     if on_off == 1 then
         click_press = os.time()
         click_edit = true
-        LED("pad_05", BLACK)
+        LED("pad_07", BLACK)
     else
         click_edit = false
         local click_release = os.time()
@@ -509,22 +518,22 @@ function click_bin_modif(pad)
     update_LEDs_BPM()
 end
 
-function pad_01_0(on_off) if on_off == 0 then click_bin_modif("01") end end
-function pad_02_0(on_off) if on_off == 0 then click_bin_modif("02") end end
-function pad_03_0(on_off) if on_off == 0 then click_bin_modif("03") end end
-function pad_04_0(on_off) if on_off == 0 then click_bin_modif("04") end end
 function pad_09_0(on_off) if on_off == 0 then click_bin_modif("09") end end
 function pad_10_0(on_off) if on_off == 0 then click_bin_modif("10") end end
 function pad_11_0(on_off) if on_off == 0 then click_bin_modif("11") end end
 function pad_12_0(on_off) if on_off == 0 then click_bin_modif("12") end end
+function pad_13_0(on_off) if on_off == 0 then click_bin_modif("13") end end
+function pad_14_0(on_off) if on_off == 0 then click_bin_modif("14") end end
+function pad_15_0(on_off) if on_off == 0 then click_bin_modif("15") end end
+function pad_16_0(on_off) if on_off == 0 then click_bin_modif("16") end end
 
-function pad_06_0(on_off)
+function pad_01_0(on_off)
     if confirm_what then return end
     -- half time
     if on_off == 1 then
-        LED("pad_06", YELLOW)
+        LED("pad_01", YELLOW)
     else
-        LED("pad_06", RED)
+        LED("pad_01", BPM_MULT_COLORS["01"])
         if BPM % 2 == 0 then
             local bpm = BPM_int(BPM/2)
             if bpm >= 10 then
@@ -536,13 +545,13 @@ function pad_06_0(on_off)
     end
 end
 
-function pad_07_0(on_off)
+function pad_02_0(on_off)
     if confirm_what then return end
     -- double time
     if on_off == 1 then
-        LED("pad_07", YELLOW)
+        LED("pad_02", YELLOW)
     else
-        LED("pad_07", GREEN)
+        LED("pad_02", BPM_MULT_COLORS["02"])
         local bpm = BPM_int(BPM*2)
         if bpm <= 250 then
             BPM = bpm
@@ -557,11 +566,7 @@ function increment(pad, on_off)
     if on_off == 1 then
         LED("pad_"..pad, YELLOW)
     else
-        local colors = {["13"]= ORANGE,
-                        ["14"]= RED,
-                        ["15"]= GREEN,
-                        ["16"]= APPLE}
-        LED("pad_"..pad, colors[pad])
+        LED("pad_"..pad, BPM_INCREMENT_COLORS[pad])
         local bpm = BPM + PADS_click_modif[pad]
         if 10 <= bpm and bpm <= 250 then
             BPM = bpm
@@ -571,10 +576,10 @@ function increment(pad, on_off)
     end
 end
 
-function pad_13_0(on_off) increment("13", on_off) end
-function pad_14_0(on_off) increment("14", on_off) end
-function pad_15_0(on_off) increment("15", on_off) end
-function pad_16_0(on_off) increment("16", on_off) end
+function pad_03_0(on_off) increment("03", on_off) end
+function pad_04_0(on_off) increment("04", on_off) end
+function pad_05_0(on_off) increment("05", on_off) end
+function pad_06_0(on_off) increment("06", on_off) end
 
 function pad_08_0(on_off)
     if confirm_what then return end
