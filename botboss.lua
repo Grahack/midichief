@@ -322,7 +322,9 @@ function update_LEDs_synth_patch()
     end
     for _, pad in ipairs(pads) do
         local filename = patch_filename(pad, page)
+        print("Looking for", filename)
         if file_exists(filename) then
+            print("Found it!")
             -- load color
             local content = load_content(filename)
             local patch = load("return "..content)()
