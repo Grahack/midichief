@@ -143,10 +143,10 @@ PADS_modif["05"] =  -1
 PADS_modif["06"] =   1
 -- Pad numbers for binary display of Fluidsynth's program
 local PADS_fluid = {"16", "15", "14", "13", "12", "11", "10", "09"}
-local PC_INCREMENT_COLORS = {["05"]= RED,
-                             ["06"]= GREEN,
-                             ["07"]= ORANGE,
-                             ["08"]= APPLE}
+local PC_INCREMENT_COLORS = {["01"]= RED,
+                             ["02"]= GREEN,
+                             ["03"]= ORANGE,
+                             ["04"]= APPLE}
 -- Pad numbers for binary display of synth types
 local PADS_synth = {"16", "15", "14", "13"}
 -- Codes for MIDI notes or CC sent by the Launchkey (DAW mode, decimal)
@@ -356,12 +356,12 @@ function update_LEDs_synth_patch()
 end
 
 function update_LEDs_fluid()
-    local pads = {"01", "02", "03", "04"}
-    for _, pad in ipairs(pads) do
-        LED("pad_"..pad, BLACK)
-    end
     for pad, color in pairs(PC_INCREMENT_COLORS) do
         LED("pad_"..pad, color)
+    end
+    local pads = {"05", "06", "07", "08"}
+    for _, pad in ipairs(pads) do
+        LED("pad_"..pad, BLACK)
     end
     for i, b in ipairs(fluidsynth_PC_bits) do
         if b > 0 then
@@ -946,7 +946,7 @@ function fluid(pad, on_off)
     else
         -- MIDI GM goes from 1 to 127 but Fluidsynth and the font from 0 to 127
         local changed = false
-        if pad == "05" then
+        if pad == "01" then
             -- decrement category
             local cat = current_GM_category()
             if cat > 1 then
@@ -955,7 +955,7 @@ function fluid(pad, on_off)
                 changed = true
             end
             LED("pad_"..pad, RED)
-        elseif pad == "06" then
+        elseif pad == "02" then
             -- increment category
             local cat = current_GM_category()
             if cat < #GM_CATEGORIES then
@@ -964,14 +964,14 @@ function fluid(pad, on_off)
                 changed = true
             end
             LED("pad_"..pad, GREEN)
-        elseif pad == "07" then
+        elseif pad == "03" then
             -- decrement PC
             if fluidsynth_PC > 0 then
                 fluidsynth_PC = fluidsynth_PC - 1
                 changed = true
             end
             LED("pad_"..pad, ORANGE)
-        elseif pad == "08" then
+        elseif pad == "04" then
             -- increment PC
             if fluidsynth_PC < 127 then
                 fluidsynth_PC = fluidsynth_PC + 1
@@ -988,10 +988,10 @@ function fluid(pad, on_off)
     end
 end
 
-function pad_05_2(on_off) fluid("05", on_off) end
-function pad_06_2(on_off) fluid("06", on_off) end
-function pad_07_2(on_off) fluid("07", on_off) end
-function pad_08_2(on_off) fluid("08", on_off) end
+function pad_01_2(on_off) fluid("01", on_off) end
+function pad_02_2(on_off) fluid("02", on_off) end
+function pad_03_2(on_off) fluid("03", on_off) end
+function pad_04_2(on_off) fluid("04", on_off) end
 
 function PC_bin_modif(on_off, pad)
     if confirm_what then return end
