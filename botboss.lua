@@ -216,7 +216,6 @@ local drums_mode = false     -- drums on higher notes of the kbd?
 local parakick_mode = false  -- parallel kick on bass notes?
 BPM = 60  -- global for access from midichief.c
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
-local click_press = 0  -- to implement long press
 local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
 local click_note  = 42  -- HH by default
@@ -465,19 +464,15 @@ function pad_07_0(on_off)
     if confirm_what then return end
     -- click edit
     if on_off == 1 then
-        click_press = os.time()
         click_edit = true
         LED("pad_07", BLACK)
     else
         click_edit = false
-        local click_release = os.time()
-        if click_release - click_press <= 1 then
-            click_mode = (click_mode + 1) % 4
-            if click_mode <= 1 then
-                click_lit = false
-            end
-            update_LEDs()
+        click_mode = (click_mode + 1) % 4
+        if click_mode <= 1 then
+            click_lit = false
         end
+        update_LEDs()
     end
 end
 
