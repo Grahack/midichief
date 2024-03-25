@@ -24,6 +24,7 @@ local NOTE_O_HH = 46
 local NOTE_CRASH = 49
 -- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
+local WHITE = 3
 local RED = 5
 local YELLOW = 13
 local GREEN = 123
@@ -343,7 +344,7 @@ function update_LEDs_synth_patch()
         end
     end
     if page == synth_patch_page and synth_patch_pad ~= nil then
-        LED("pad_"..synth_patch_pad, GREEN)
+        LED("pad_"..synth_patch_pad, WHITE)
     end
 end
 
