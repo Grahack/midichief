@@ -184,7 +184,7 @@ cc_fns[104] = "play_up"
 cc_fns[105] = "play_down"
 cc_fns[115] = "play"
 cc_fns[117] = "rec"
--- MIDI GM categories (but our values should be one less
+-- MIDI GM categories (but our values should be one less)
 --   1 -   8  Keys
 --   9 -  16  Chrom. Perc.
 --  17 -  21  Organs
