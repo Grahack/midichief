@@ -476,8 +476,9 @@ function pad_07_0(on_off)
     end
 end
 
-function click_bin_modif(pad)
+function click_bin_modif(on_off, pad)
     if confirm_what then return end
+    if on_off == 1 then return end  -- continue only if the button is released
     local bit_num = PADS_click_bit_num[pad]
     local modif = PADS_click_modif[pad]
     if BPM_bits[bit_num] > 0 then
@@ -492,14 +493,14 @@ function click_bin_modif(pad)
     update_LEDs_BPM()
 end
 
-function pad_09_0(on_off) if on_off == 0 then click_bin_modif("09") end end
-function pad_10_0(on_off) if on_off == 0 then click_bin_modif("10") end end
-function pad_11_0(on_off) if on_off == 0 then click_bin_modif("11") end end
-function pad_12_0(on_off) if on_off == 0 then click_bin_modif("12") end end
-function pad_13_0(on_off) if on_off == 0 then click_bin_modif("13") end end
-function pad_14_0(on_off) if on_off == 0 then click_bin_modif("14") end end
-function pad_15_0(on_off) if on_off == 0 then click_bin_modif("15") end end
-function pad_16_0(on_off) if on_off == 0 then click_bin_modif("16") end end
+function pad_09_0(on_off) click_bin_modif(on_off, "09") end
+function pad_10_0(on_off) click_bin_modif(on_off, "10") end
+function pad_11_0(on_off) click_bin_modif(on_off, "11") end
+function pad_12_0(on_off) click_bin_modif(on_off, "12") end
+function pad_13_0(on_off) click_bin_modif(on_off, "13") end
+function pad_14_0(on_off) click_bin_modif(on_off, "14") end
+function pad_15_0(on_off) click_bin_modif(on_off, "15") end
+function pad_16_0(on_off) click_bin_modif(on_off, "16") end
 
 function pad_01_0(on_off)
     if confirm_what then return end
