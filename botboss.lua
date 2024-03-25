@@ -251,71 +251,41 @@ function click()
     end
 end
 
-function play_up_0(value)
+function page_up(value)
     if confirm_what then
         confirm(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 1
+    elseif value == 127 then  -- on press
+        LED2("play_up", 127)
+    else
+        LED2("play_up", 0)
+        print("Page was", page)
+        page = page + 1  -- no need to check (not triggered on page 3)
+        print("Now page is", page)
         update_LEDs()
     end
 end
 
-function play_up_1(value)
-    if confirm_what then
-        confirm(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 2
-        update_LEDs()
-    end
-end
-
-function play_up_2(value)
-    if confirm_what then
-        confirm(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 3
-        update_LEDs()
-    end
-end
-
-function play_down_1(value)
+function page_down(value)
     if confirm_what then
         cancel(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 0
+    elseif value == 127 then  -- on press
+        LED2("play_down", 127)
+    else
+        LED2("play_up", 0)
+        print("Page was", page)
+        page = page - 1  -- no need to check (not triggered on page 0)
+        print("Now page is", page)
         update_LEDs()
     end
 end
 
-function play_down_2(value)
-    if confirm_what then
-        cancel(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 1
-        update_LEDs()
-    end
-end
+function play_up_0(value) page_up(value) end
+function play_up_1(value) page_up(value) end
+function play_up_2(value) page_up(value) end
 
-function play_down_3(value)
-    if confirm_what then
-        cancel(value)
-        return
-    end
-    if value == 0 then  -- on release
-        page = 2
-        update_LEDs()
-    end
-end
+function play_down_1(value) page_down(value) end
+function play_down_2(value) page_down(value) end
+function play_down_3(value) page_down(value) end
 
 function LED(where, color)
     note_on_off(0, CHAN_LK_LEDs, LED_map[where], color)
