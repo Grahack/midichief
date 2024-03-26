@@ -204,6 +204,8 @@ cc_fns[117] = "rec"
 -- 120 - 128  Effects
 GM_CATEGORIES = {0, 8, 16, 21, 24, 32, 40, 52, 55, 64, 72, 80, 88,
                  96, 104, 112, 119, 127}
+-- Pad numbers for binary display of fluidsynth category
+local PADS_fluid_category = {"08", "07", "06", "05"}
 
 -- This function is used in the state section so is defined before it
 function init_patch()
@@ -356,13 +358,20 @@ function update_LEDs_synth_patch()
 end
 
 function update_LEDs_fluid()
+    -- controls
     for pad, color in pairs(PC_INCREMENT_COLORS) do
         LED("pad_"..pad, color)
     end
-    local pads = {"05", "06", "07", "08"}
-    for _, pad in ipairs(pads) do
-        LED("pad_"..pad, BLACK)
+    -- GM category
+    local category = current_GM_category()
+    for i, b in ipairs(bits4(category)) do
+        if b > 0 then
+            LED("pad_"..PADS_fluid_category[i], PINK)
+        else
+            LED("pad_"..PADS_fluid_category[i], BLACK)
+        end
     end
+    -- program number
     for i, b in ipairs(fluidsynth_PC_bits) do
         if b > 0 then
             LED("pad_"..PADS_fluid[i], PINK)
