@@ -808,6 +808,13 @@ function pot_5_0(value)
     end
 end
 
+function pc_to_fluid()
+    pc(CHAN_FLUID, fluidsynth_PC)
+    print("PC to Fluidsynth:", fluidsynth_PC)
+    fluidsynth_PC_bits = bits8(fluidsynth_PC)
+    update_LEDs_fluid()
+end
+
 function synth_pot(pot, value)
     if confirm_what then return end
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
@@ -989,10 +996,7 @@ function fluid(pad, on_off)
             LED("pad_"..pad, APPLE)
         end
         if changed then
-            pc(CHAN_FLUID, fluidsynth_PC)
-            print("PC to Fluidsynth:", fluidsynth_PC)
-            fluidsynth_PC_bits = bits8(fluidsynth_PC)
-            update_LEDs_fluid()
+            pc_to_fluid()
         end
     end
 end
@@ -1018,9 +1022,7 @@ function PC_bin_modif(on_off, pad)
             fluidsynth_PC_bits[bit_num] = 1
         end
     end
-    pc(CHAN_FLUID, fluidsynth_PC)
-    print("PC to Fluidsynth:", fluidsynth_PC)
-    update_LEDs_fluid()
+    pc_to_fluid()
 end
 
 function pad_09_2(on_off) PC_bin_modif(on_off, "09") end
