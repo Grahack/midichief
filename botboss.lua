@@ -815,6 +815,12 @@ function pc_to_fluid()
     update_LEDs_fluid()
 end
 
+function pot_5_2(value)
+    if confirm_what then return end
+    fluidsynth_PC = value
+    pc_to_fluid()
+end
+
 function synth_pot(pot, value)
     if confirm_what then return end
     local key = synth_cur_line.."_"..synth_cur_pad[synth_cur_line]
