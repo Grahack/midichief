@@ -203,7 +203,7 @@ cc_fns[117] = "rec"
 -- 113 - 119  Misc. Perc.
 -- 120 - 128  Effects
 GM_CATEGORIES = {0, 8, 16, 21, 24, 32, 40, 52, 55, 64, 72, 80, 88,
-                 96, 104, 112, 119}
+                 96, 104, 112, 119, 127}
 
 -- This function is used in the state section so is defined before it
 function init_patch()
