@@ -472,7 +472,7 @@ function update_LEDs_synth()
         LED("pad_05", BLACK)
         LED("pad_06", BLACK)
         LED("pad_07", BLACK)
-        LED("pad_"..synth_cur_pad[synth_cur_line], GREEN)
+        LED("pad_"..synth_cur_pad[synth_cur_line], INDIGO)
         if synth_cur_line == 1 then
             LED("pad_08", APPLE)
         else
