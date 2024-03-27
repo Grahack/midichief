@@ -21,10 +21,13 @@ local DUMMY_CC = 127
 local NOTE_HH   = 42
 local NOTE_KICK = 36
 local NOTE_SN   = 40
+local NOTE_F_HH = 44
 local NOTE_O_HH = 46
 local NOTE_CRASH = 49
 local NOTE_RIDE = 51
 local CRASH_SENSITIVITY = 120
+local FOOT_HH_SENSITIVITY = 90
+local FOOT_HH_BONUS = 30
 -- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
 local WHITE = 3
@@ -225,6 +228,7 @@ local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
 local drums_mode = false     -- drums on higher notes of the kbd?
 local parakick_mode = false  -- parallel kick on bass notes?
+local foot_hh_mode = false   -- foot hh when playing soft hh?
 BPM = 60  -- global for access from midichief.c
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_edit  = false  -- edit mode activated?
@@ -422,7 +426,11 @@ function update_LEDs()
         else
             LED("pad_03", RED)
         end
-        LED("pad_04", BLACK)
+        if foot_hh_mode then
+            LED("pad_04", GREEN)
+        else
+            LED("pad_04", RED)
+        end
         update_LEDs_synth_patch()
         update_LEDs_synth()
     elseif page == PAGE_FLUID then
@@ -644,6 +652,21 @@ function pad_03_1(on_off)
             LED("pad_03", GREEN)
         else
             LED("pad_03", RED)
+        end
+    end
+end
+
+function pad_04_1(on_off)
+    if confirm_what then return end
+    -- foot hh when playing soft hh?
+    if on_off == 1 then
+        LED("pad_04", YELLOW)
+    else
+        foot_hh_mode = not foot_hh_mode
+        if foot_hh_mode then
+            LED("pad_04", GREEN)
+        else
+            LED("pad_04", RED)
         end
     end
 end
@@ -1057,7 +1080,12 @@ function on_note(on_off, chan, note, velo)
         -- be bass notes, except for the highest on the keyboard: drum sounds.
         if drums_mode then
             if note == 68 then      -- HH
-                note_on_off(on_off, CHAN_drums, NOTE_HH,   velo);
+                if foot_hh_mode and velo < FOOT_HH_SENSITIVITY then
+                    local new_velo = math.min(127, velo+FOOT_HH_BONUS)
+                    note_on_off(on_off, CHAN_drums, NOTE_F_HH, new_velo);
+                else
+                    note_on_off(on_off, CHAN_drums, NOTE_HH, velo);
+                end
             elseif note == 70 then  -- open HH
                 note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
             elseif note == 72 then  -- snare
