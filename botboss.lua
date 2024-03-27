@@ -22,6 +22,8 @@ local NOTE_KICK = 36
 local NOTE_SN   = 40
 local NOTE_O_HH = 46
 local NOTE_CRASH = 49
+local NOTE_RIDE = 51
+local CRASH_SENSITIVITY = 120
 -- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
 local WHITE = 3
@@ -1062,7 +1064,11 @@ function on_note(on_off, chan, note, velo)
             elseif note == 71 then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 69 then  -- crash
-                note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
+                if velo >= CRASH_SENSITIVITY then
+                    note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
+                else
+                    note_on_off(on_off, CHAN_drums, NOTE_RIDE, velo);
+                end
             else
                 note_on_off(on_off, chan, note-24, velo);
                 if parakick_mode then
