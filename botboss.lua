@@ -16,6 +16,7 @@ local CHAN_LK2 = 15  -- but also to this one
 local CHAN_NTS = 1 -- NTS channel
 local CHAN_FLUID = 3 -- Fluidsynth channel
 local CHAN_drums = 9
+-- other MIDI things
 local DUMMY_CC = 127
 local NOTE_HH   = 42
 local NOTE_KICK = 36
