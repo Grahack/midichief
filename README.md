@@ -18,7 +18,11 @@ It reads a Lua file which should contain functions that are triggered
 by MIDI events. Those functions can, in turn, send MIDI events.
 
 BEWARE: since reading MIDI events is blocking I had to use pthreads,
-which it seems I'm not very good at. Some mem bugs could occur.
+which it seems I'm not very good at. Some mem bugs could occur because I try
+to share a Lua state between the two threads.
+
+- `double free or corruption (!prev)` (when setting the click mode to
+  visual + sound)
 
 ### setup.sh
 
