@@ -25,8 +25,8 @@ local NOTE_F_HH = 44
 local NOTE_O_HH = 46
 local NOTE_CRASH = 49
 local NOTE_RIDE = 51
-local CRASH_SENSITIVITY = 120
-local FOOT_HH_SENSITIVITY = 90
+local CRASH_SENSITIVITY =   120  -- hit the ride harder and you'll have a crash
+local FOOT_HH_SENSITIVITY =  90  -- hit the HH softer and you'll have a foot hh
 local FOOT_HH_BONUS = 30
 -- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
