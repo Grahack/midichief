@@ -57,10 +57,12 @@ to the `BPM` global variable living in the Lua file.
 
 ### Functions you can use in your Lua file
 
-`note_on_off`, `cc` and `pc` trigger the corresponding events, with the
-relevant parameters above,
-
-`tap` (no parameter) will return the computed BPM when called repeatedly.
+- trigger MIDI events:  
+  `note_on_off`, `cc` and `pc` trigger the corresponding events, with the
+  relevant parameters above,
+- other functions
+  - `tap` (no parameter) will return the computed BPM when called repeatedly.
+  - `reload_rules` will read the rules file and update the functions
 
 ## Install
 
