@@ -47,7 +47,7 @@ fluidsynth -i --server --gain 2 --audio-driver=alsa \
            --sample-rate 48000.000 \
            --audio-bufcount=2 \
            --audio-bufsize=32 \
-           -o audio.alsa.device=hw:$NUM_SOUNDCARD \
+           -o "audio.alsa.device=hw:$NUM_SOUNDCARD" \
            $FONT >> $LOG 2>&1 &
 connect_ALSA "Launchkey":0 "MIDI Chief":0
 connect_ALSA "Launchkey":1 "MIDI Chief":0
