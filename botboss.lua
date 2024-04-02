@@ -228,7 +228,9 @@ local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
 local drums_mode = false     -- drums on higher notes of the kbd?
 local parakick_mode = false  -- parallel kick on bass notes?
+local crash_sensitivity = CRASH_SENSITIVITY  -- see the constant above
 local foot_hh_mode = false   -- foot hh when playing soft hh?
+local foot_hh_sensitivity = FOOT_HH_SENSITIVITY  -- see the constant above
 BPM = 60  -- global for access from midichief.c
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_edit  = false  -- edit mode activated?
@@ -842,6 +844,46 @@ function pc_to_fluid()
     update_LEDs_fluid()
 end
 
+function set_vol_fluidsynth(vol)
+    if confirm_what then return end
+    cc(CHAN_FLUID, 7, vol)
+end
+
+function pot_1_0(value) set_vol_fluidsynth(value) end
+function pot_1_1(value) set_vol_fluidsynth(value) end
+function pot_1_2(value) set_vol_fluidsynth(value) end
+function pot_1_3(value) set_vol_fluidsynth(value) end
+
+function set_vol_drums(vol)
+    if confirm_what then return end
+    cc(CHAN_drums, 7, vol)
+end
+
+function pot_2_0(value) set_vol_drums(value) end
+function pot_2_1(value) set_vol_drums(value) end
+function pot_2_2(value) set_vol_drums(value) end
+function pot_2_3(value) set_vol_drums(value) end
+
+function set_crash_sens(velo)
+    if confirm_what then return end
+    crash_sensitivity = velo
+end
+
+function pot_3_0(value) set_crash_sens(value) end
+function pot_3_1(value) set_crash_sens(value) end
+function pot_3_2(value) set_crash_sens(value) end
+function pot_3_3(value) set_crash_sens(value) end
+
+function set_foot_hh_sens(velo)
+    if confirm_what then return end
+    foot_hh_sensitivity = velo
+end
+
+function pot_4_0(value) set_foot_hh_sens(value) end
+function pot_4_1(value) set_foot_hh_sens(value) end
+function pot_4_2(value) set_foot_hh_sens(value) end
+function pot_4_3(value) set_foot_hh_sens(value) end
+
 function pot_5_2(value)
     if confirm_what then return end
     fluidsynth_PC = value
@@ -1081,7 +1123,7 @@ function on_note(on_off, chan, note, velo)
         -- be bass notes, except for the highest on the keyboard: drum sounds.
         if drums_mode then
             if note == 68 then      -- HH
-                if foot_hh_mode and velo < FOOT_HH_SENSITIVITY then
+                if foot_hh_mode and velo < foot_hh_sensitivity then
                     local new_velo = math.min(127, velo+FOOT_HH_BONUS)
                     note_on_off(on_off, CHAN_drums, NOTE_F_HH, new_velo);
                 else
@@ -1094,7 +1136,7 @@ function on_note(on_off, chan, note, velo)
             elseif note == 71 then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 69 then  -- crash
-                if velo >= CRASH_SENSITIVITY then
+                if velo >= crash_sensitivity then
                     note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
                 else
                     note_on_off(on_off, CHAN_drums, NOTE_RIDE, velo);
