@@ -614,6 +614,7 @@ function pad_01_1(on_off)
     else
         local halt_release = os.time()
         if halt_release - halt_press >= 2 then
+            update_LEDs_black()
             LED("pad_01", RED)
             confirm_what = "halt"
             update_LEDs_confirm()
