@@ -25,9 +25,13 @@ local NOTE_F_HH = 44
 local NOTE_O_HH = 46
 local NOTE_CRASH = 49
 local NOTE_RIDE =  51
+local NOTE_CLAP =  39
+local NOTE_COWBELL = 56
 local CRASH_SENSITIVITY =   120  -- hit the ride harder and you'll have a crash
 local FOOT_HH_SENSITIVITY =  90  -- hit the HH softer and you'll have a foot hh
 local FOOT_HH_BONUS = 30
+local CLICK_NOTES = {NOTE_HH, NOTE_F_HH, NOTE_RIDE,
+                     NOTE_CLAP, NOTE_COWBELL, NOTE_KICK}
 -- constants for LED colors (Launchkey in DAW mode)
 local BLACK = 0
 local WHITE = 3
@@ -232,6 +236,7 @@ local crash_sensitivity = CRASH_SENSITIVITY  -- see the constant above
 local foot_hh_mode = false   -- foot hh when playing soft hh?
 local foot_hh_sensitivity = FOOT_HH_SENSITIVITY  -- see the constant above
 BPM = 60  -- global for access from midichief.c
+local click_note = NOTE_HH
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
@@ -835,6 +840,11 @@ function pot_5_0(value)
         BPM_bits = bits8(BPM)
         update_LEDs_BPM()
     end
+end
+
+function pot_6_0(value)
+    local pos = math.modf(value/127*(#CLICK_NOTES-1) + 1)
+    click_note = CLICK_NOTES[pos]
 end
 
 function pc_to_fluid()
