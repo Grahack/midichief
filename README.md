@@ -23,6 +23,7 @@ to share a Lua state between the two threads.
 
 - `double free or corruption (!prev)` (when setting the click mode to
   visual + sound)
+- `corrupted double-linked list (not small)` ?
 
 ### setup.sh
 
