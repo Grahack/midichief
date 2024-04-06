@@ -194,26 +194,28 @@ cc_fns[104] = "play_up"
 cc_fns[105] = "play_down"
 cc_fns[115] = "play"
 cc_fns[117] = "rec"
--- MIDI GM categories (but our values should be one less)
---   1 -   8  Keys
---   9 -  16  Chrom. Perc.
---  17 -  21  Organs
---  22 -  24  Accord. Harmonica
---  25 -  32  Guitars
---  33 -  40  Basses
---  41 -  52  Strings (but 48: Timpani)
---  53 -  55  Voices
---  56 -  64  Orch. Hit and Brass
---  65 -  72  Reeds
---  73 -  80  Wind
---  81 -  88  Synth lead
---  89 -  96  Pads
---  97 - 104  Effets
--- 105 - 112  Ethnic
--- 113 - 119  Misc. Perc.
--- 120 - 128  Effects
+-- MIDI GM categories (1-128 system)
+--  1   1 -   8  Keys
+--  2   9 -  16  Chrom. Perc.
+--  3  17 -  21  Organs
+--  4  22 -  24  Accord. Harmonica
+--  5  25 -  32  Guitars
+--  6  33 -  40  Basses
+--  7  41 -  52  Strings (but 48: Timpani)
+--  8  53 -  55  Voices
+--  9  56 -  64  Orch. Hit and Brass
+-- 10  65 -  72  Reeds
+-- 11  73 -  80  Wind
+-- 12  81 -  88  Synth lead
+-- 13  89 -  96  Pads
+-- 14  97 - 104  Effets
+-- 15 105 - 112  Ethnic
+-- 16 113 - 119  Misc. Perc.
+-- 17 120 - 128  Effects
+-- We put this in the following table where the numbers are the starts
+-- of categories (0-127 system):
 GM_CATEGORIES = {0, 8, 16, 21, 24, 32, 40, 52, 55, 64, 72, 80, 88,
-                 96, 104, 112, 119, 127}
+                 96, 104, 112, 119, 128}  -- 128 because we need a limit
 -- Pad numbers for binary display of fluidsynth category
 local PADS_fluid_category = {"08", "07", "06", "05"}
 
@@ -1035,7 +1037,7 @@ function pad_16_3(on_off) patch("16", on_off) end
 
 function current_GM_category()
     local cat = 1
-    while GM_CATEGORIES[cat] < fluidsynth_PC do
+    while GM_CATEGORIES[cat + 1] <= fluidsynth_PC do
         cat = cat + 1
     end
     return cat
@@ -1059,7 +1061,7 @@ function fluid(pad, on_off)
         elseif pad == "02" then
             -- increment category
             local cat = current_GM_category()
-            if cat < #GM_CATEGORIES then
+            if cat < #GM_CATEGORIES - 1 then
                 cat = cat + 1
                 fluidsynth_PC = GM_CATEGORIES[cat]
                 changed = true
