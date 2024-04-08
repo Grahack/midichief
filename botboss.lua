@@ -233,6 +233,8 @@ local confirm_what = nil
 local page = 0  -- can be any non negative integer
 local halt_press = 0   -- to implement long press
 local drums_mode = false     -- drums on higher notes of the kbd?
+local drums_press = 0        -- to implement long press
+local drums_oct   = 0        -- the octave the drums are in (0 or 1)
 local parakick_mode = false  -- parallel kick on bass notes?
 local crash_sensitivity = CRASH_SENSITIVITY  -- see the constant above
 local foot_hh_mode = false   -- foot hh when playing soft hh?
@@ -641,12 +643,20 @@ function pad_02_1(on_off)
     -- drums high on the keyboard?
     if on_off == 1 then
         LED("pad_02", YELLOW)
+        drums_press = os.time()
     else
-        drums_mode = not drums_mode
-        if drums_mode then
+        local drums_release = os.time()
+        if drums_release - drums_press >= 2 then
+            drums_oct = 1 - drums_oct
+            drums_mode = true
             LED("pad_02", GREEN)
         else
-            LED("pad_02", RED)
+            drums_mode = not drums_mode
+            if drums_mode then
+                LED("pad_02", GREEN)
+            else
+                LED("pad_02", RED)
+            end
         end
     end
 end
@@ -1134,20 +1144,21 @@ function on_note(on_off, chan, note, velo)
         -- These notes are for the NTS or Fluidsynth (resp.) and are meant to
         -- be bass notes, except for the highest on the keyboard: drum sounds.
         if drums_mode then
-            if note == 68 then      -- HH
+            local oct = drums_oct * 12
+            if note == 68 + oct then      -- HH
                 if foot_hh_mode and velo < foot_hh_sensitivity then
                     local new_velo = math.min(127, velo+FOOT_HH_BONUS)
                     note_on_off(on_off, CHAN_drums, NOTE_F_HH, new_velo);
                 else
                     note_on_off(on_off, CHAN_drums, NOTE_HH, velo);
                 end
-            elseif note == 70 then  -- open HH
+            elseif note == 70 + oct then  -- open HH
                 note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
-            elseif note == 72 then  -- snare
+            elseif note == 72 + oct then  -- snare
                 note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
-            elseif note == 71 then  -- kick
+            elseif note == 71 + oct then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
-            elseif note == 69 then  -- crash
+            elseif note == 69 + oct then  -- crash
                 if velo >= crash_sensitivity then
                     note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
                 else
