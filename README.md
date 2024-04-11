@@ -96,6 +96,41 @@ crontab -e
 @reboot sh /home/chri/botboss/midichief/setup.sh >> /tmp/midichief.log 2>&1
 ```
 
+## Doc for botboss.lua
+
+NTS patches: press=select, hold=save (needs confirm)
+
+- all pages
+  - pot 1: Fluidsynth bass volume
+  - pot 2: Fluidsynth drums volume
+  - pot 3: Crash sensitivity
+  - pot 4: Foot HH sensitivity in foot mode
+- page 0
+  - pot 5: BPM
+  - pot 6: click note (hihat, foot hihat, ride, clap, cowbell, kick}
+  - pad 1: BPM = BPM / 2
+  - pad 2: BPM = BPM * 2
+  - pads 3 to 6: -5, +5, -1, +1
+  - pad 7: click mode (nothing, sound, light, sound+light)
+  - pad 8: tap tempo
+  - pads 9 to 16: binary tweak of the BPM
+- page 1
+  - pots 5 to 8: NTS values (A, A+, B, B+)
+  - pad 1: reload rules, hold to halt the RPi (needs confirm)
+  - pad 2: drums on/off, hold to change the octave
+  - pad 3: parallel kick
+  - pad 4: foot HH (light HH means foot HH + sustain pedal is foot HH)
+  - pads 5 to 7: NTS controls
+  - pad 8: change page of NTS controls
+  - pads 9 to 12: NTS patches
+- page 2
+  - pot 5: Program Change (PC)
+  - pads 1 to 4: GM category-1, GM category+1, PC-1, PC+1
+  - pads 5 to 8: GM category (display only)
+  - pads 9 to 16: binary tweak of the GM program
+- page 3
+  - pads 1 to 16: NTS patches
+
 # French
 
 ## Fonctionnement
