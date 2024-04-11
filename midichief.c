@@ -144,6 +144,13 @@ int note_on_off_for_lua(lua_State *L) {
     return 0; // The number of returned values
 }
 
+int pb_for_lua(lua_State *L) {
+    int chan  = luaL_checkinteger(L, 1);
+    int value = luaL_checkinteger(L, 2);
+    pb(chan, value);
+    return 0; // The number of returned values
+}
+
 int cc_for_lua(lua_State *L) {
     int chan  = luaL_checkinteger(L, 1);
     int param = luaL_checkinteger(L, 2);
@@ -313,6 +320,8 @@ int main(int argc, char *argv[]) {
     lua_setglobal(L, "reload_rules");
     lua_pushcfunction(L, note_on_off_for_lua);
     lua_setglobal(L, "note_on_off");
+    lua_pushcfunction(L, pb_for_lua);
+    lua_setglobal(L, "pb");
     lua_pushcfunction(L, cc_for_lua);
     lua_setglobal(L, "cc");
     lua_pushcfunction(L, pc_for_lua);
