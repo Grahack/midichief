@@ -14,7 +14,8 @@ local CHAN_LK_LEDs2 = 15 -- light the white LEDs in static mode
 local CHAN_LK = 0    -- in DAW mode the LK sends events to this chan
 local CHAN_LK2 = 15  -- but also to this one
 local CHAN_NTS = 1 -- NTS channel
-local CHAN_FLUID = 3 -- Fluidsynth channel
+local CHAN_ALT = 2 -- Fluidsynth channel (alt keyboard)
+local CHAN_FLUID = 3 -- Fluidsynth channel (LK)
 local CHAN_drums = 9
 -- other MIDI things
 local DUMMY_CC = 127
@@ -911,6 +912,16 @@ function pot_5_2(value)
     if confirm_what then return end
     fluidsynth_PC = value
     pc_to_fluid()
+end
+
+function pot_6_2(value)
+    -- fine tuning
+    local pb_val = 0
+    if value ~= 0 then
+        pb_val = 100*(value - 64)
+    end
+    pb(CHAN_FLUID, pb_val)
+    pb(CHAN_ALT, pb_val)
 end
 
 function synth_pot(pot, value)
