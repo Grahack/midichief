@@ -264,7 +264,7 @@ local save_filename = nil
 local save_pad = nil
 local save_color = 1
 -- Fluidsynth
-local fluidsynth_PC = 32  -- the first GM bass sound
+local fluidsynth_PC = 33  -- the second GM bass sound
 local fluidsynth_PC_bits = {0, 0, 0, 0, 0, 1, 0, 0}  -- this is 32 too
 
 function click()
