@@ -1146,20 +1146,20 @@ function on_note(on_off, chan, note, velo)
         if drums_mode then
             local oct = drums_oct * 12
             -- A4 is MIDI 69
-            if note == 68 + oct then      -- HH
+            if note == 70 + oct then      -- HH
                 if foot_hh_mode and velo < foot_hh_sensitivity then
                     local new_velo = math.min(127, velo+FOOT_HH_BONUS)
                     note_on_off(on_off, CHAN_drums, NOTE_F_HH, new_velo);
                 else
                     note_on_off(on_off, CHAN_drums, NOTE_HH, velo);
                 end
-            elseif note == 70 + oct then  -- open HH
+            elseif note == 71 + oct then  -- open HH
                 note_on_off(on_off, CHAN_drums, NOTE_O_HH, velo);
             elseif note == 72 + oct then  -- snare
                 note_on_off(on_off, CHAN_drums, NOTE_SN,   velo);
-            elseif note == 71 + oct then  -- kick
+            elseif note == 69 + oct then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
-            elseif note == 69 + oct then  -- crash
+            elseif note == 68 + oct then  -- crash
                 if velo >= crash_sensitivity then
                     note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
                 else
