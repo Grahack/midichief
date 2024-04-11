@@ -1145,6 +1145,7 @@ function on_note(on_off, chan, note, velo)
         -- be bass notes, except for the highest on the keyboard: drum sounds.
         if drums_mode then
             local oct = drums_oct * 12
+            -- A4 is MIDI 69
             if note == 68 + oct then      -- HH
                 if foot_hh_mode and velo < foot_hh_sensitivity then
                     local new_velo = math.min(127, velo+FOOT_HH_BONUS)
