@@ -111,7 +111,7 @@ NTS patches: press=select, hold=save (needs confirm)
   - pot 6: click note (hihat, foot hihat, ride, clap, cowbell, kick}
   - pad 1: BPM = BPM / 2
   - pad 2: BPM = BPM * 2
-  - pads 3 to 6: -5, +5, -1, +1
+  - pads 3 to 6: BPM change (-5, +5, -1, +1)
   - pad 7: click mode (nothing, sound, light, sound+light)
   - pad 8: tap tempo
   - pads 9 to 16: binary tweak of the BPM
