@@ -119,7 +119,7 @@ NTS patches: press=select, hold=save (needs confirm)
   - pots 5 to 8: NTS values (A, A+, B, B+)
   - pad 1: reload rules, hold to halt the RPi (needs confirm)
   - pad 2: drums on/off, hold to change the octave
-  - pad 3: parallel kick
+  - pad 3: parallel kick (adds a kick to any note)
   - pad 4: foot HH (light HH means foot HH + sustain pedal is foot HH)
   - pads 5 to 7: NTS controls
   - pad 8: change page of NTS controls
