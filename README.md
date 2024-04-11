@@ -126,6 +126,8 @@ NTS patches: press=select, hold=save (needs confirm)
   - pads 9 to 12: NTS patches
 - page 2
   - pot 5: Program Change (PC)
+  - pot 6: Fine tuning with a pitch bend tweak (0 is 0, else PB = 100(V-64)
+    which gives us approx. two semitones each side
   - pads 1 to 4: GM category-1, GM category+1, PC-1, PC+1
   - pads 5 to 8: GM category (display only)
   - pads 9 to 16: binary tweak of the GM program
