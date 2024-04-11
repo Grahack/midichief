@@ -871,6 +871,10 @@ end
 function set_vol_fluidsynth(vol)
     if confirm_what then return end
     cc(CHAN_FLUID, 7, vol)
+    cc(CHAN_ALT, 7, vol)
+    -- Do NOT send cc(CHAN_NTS, 7, vol) since it will resurrect
+    -- Fluidsynth on the NTS channel (or if you want to mix sound
+    -- just file an issue on Github).
 end
 
 function pot_1_0(value) set_vol_fluidsynth(value) end
@@ -920,6 +924,7 @@ function pot_6_2(value)
     if value ~= 0 then
         pb_val = 100*(value - 64)
     end
+    pb(CHAN_NTS, pb_val)
     pb(CHAN_FLUID, pb_val)
     pb(CHAN_ALT, pb_val)
 end
