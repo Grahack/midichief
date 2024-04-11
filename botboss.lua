@@ -238,6 +238,7 @@ local drums_oct   = 0        -- the octave the drums are in (0 or 1)
 local parakick_mode = false  -- parallel kick on bass notes?
 local crash_sensitivity = CRASH_SENSITIVITY  -- see the constant above
 local foot_hh_mode = false   -- foot hh when playing soft hh?
+                             -- sustain pedal will also trigger foot hh
 local foot_hh_sensitivity = FOOT_HH_SENSITIVITY  -- see the constant above
 BPM = 60  -- global for access from midichief.c
 local click_note = NOTE_HH
@@ -1228,10 +1229,18 @@ function on_cc(chan, param, val)
         end
     -- KICK with the sustain pedal
     elseif chan == CHAN_NTS or chan == CHAN_FLUID then
-        if param == 64 and val == 127 then  -- KICK
-            note_on_off(1, CHAN_drums, NOTE_KICK, 100);
-        elseif param == 64 and val == 0 then    -- KICK
-            note_on_off(0, CHAN_drums, NOTE_KICK, 0);
+        if param == 64 and val == 127 then  -- sustain pedal press
+            if foot_hh_mode then
+                note_on_off(1, CHAN_drums, NOTE_F_HH, 100);
+            else
+                note_on_off(1, CHAN_drums, NOTE_KICK, 100);
+            end
+        elseif param == 64 and val == 0 then    -- sustain pedal release
+            if foot_hh_mode then
+                note_on_off(0, CHAN_drums, NOTE_F_HH, 0);
+            else
+                note_on_off(0, CHAN_drums, NOTE_KICK, 0);
+            end
         else
             cc(chan, param, val)
         end
