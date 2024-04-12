@@ -114,7 +114,7 @@ NTS patches: press=select, hold=save (needs confirm)
   - pads 3 to 6: BPM change (-5, +5, -1, +1)
   - pad 7: click mode (nothing, sound, light, sound+light)
   - pad 8: tap tempo
-  - pads 9 to 16: binary tweak of the BPM
+  - pads 9 to 16: binary display+tweak of the BPM
 - page 1
   - pots 5 to 8: NTS values (A, A+, B, B+)
   - pad 1: reload rules, hold to halt the RPi (needs confirm)
@@ -130,7 +130,7 @@ NTS patches: press=select, hold=save (needs confirm)
     which gives us approx. two semitones each side
   - pads 1 to 4: GM category-1, GM category+1, PC-1, PC+1
   - pads 5 to 8: GM category (display only)
-  - pads 9 to 16: binary tweak of the GM program
+  - pads 9 to 16: binary display+tweak of the GM program
 - page 3
   - pads 1 to 16: NTS patches
 
