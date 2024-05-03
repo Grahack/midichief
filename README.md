@@ -109,6 +109,7 @@ NTS patches: press=select, hold=save (needs confirm)
 - page 0
   - pot 5: BPM
   - pot 6: click note (hihat, foot hihat, ride, clap, cowbell, kick}
+  - pot 7: click velocity (volume still controlled by pot 2)
   - pad 1: BPM = BPM / 2
   - pad 2: BPM = BPM * 2
   - pads 3 to 6: BPM change (-5, +5, -1, +1)

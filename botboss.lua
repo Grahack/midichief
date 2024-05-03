@@ -243,6 +243,7 @@ local foot_hh_mode = false   -- foot hh when playing soft hh?
 local foot_hh_sensitivity = FOOT_HH_SENSITIVITY  -- see the constant above
 BPM = 60  -- global for access from midichief.c
 local click_note = NOTE_HH
+local click_velo = 127
 local BPM_bits = {0, 0, 1, 1, 1, 1, 0, 0}  -- this is 60 too
 local click_edit  = false  -- edit mode activated?
 local click_mode  = 0   -- 0 nothing, 1 sound, 2 visual, 3 both
@@ -275,8 +276,8 @@ function click()
         return
     end
     if click_mode == 1 or click_mode == 3 then
-        note_on_off(1, CHAN_drums, click_note, 127)
-        note_on_off(0, CHAN_drums, click_note, 127)
+        note_on_off(1, CHAN_drums, click_note, click_velo)
+        note_on_off(0, CHAN_drums, click_note, click_velo)
     end
     if click_mode == 2 or click_mode == 3 then
         click_lit = not click_lit
@@ -859,6 +860,10 @@ end
 function pot_6_0(value)
     local pos = math.modf(value/127*(#CLICK_NOTES-1) + 1)
     click_note = CLICK_NOTES[pos]
+end
+
+function pot_7_0(value)
+    click_velo = value
 end
 
 function pc_to_fluid()
