@@ -655,11 +655,15 @@ function pad_02_1(on_off)
             LED("pad_02", GREEN)
         else
             drums_mode = not drums_mode
-            if drums_mode then
+        end
+        if drums_mode then
+            if drums_oct == 0 then
                 LED("pad_02", GREEN)
             else
-                LED("pad_02", RED)
+                LED("pad_02", APPLE)
             end
+        else
+            LED("pad_02", RED)
         end
     end
 end
