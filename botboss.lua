@@ -1178,7 +1178,7 @@ function on_note(on_off, chan, note, velo)
             elseif note == 69 + oct then  -- kick
                 note_on_off(on_off, CHAN_drums, NOTE_KICK, velo);
             elseif note == 68 + oct then  -- crash
-                if velo >= crash_sensitivity then
+                if velo > crash_sensitivity then  -- '>' makes it disable-able
                     note_on_off(on_off, CHAN_drums, NOTE_CRASH, velo);
                 else
                     note_on_off(on_off, CHAN_drums, NOTE_RIDE, velo);
