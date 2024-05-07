@@ -11,6 +11,7 @@ PAGE_NTS_VAULT = 3
 local CHAN_LK_DAW = 15 -- set in DAW mode
 local CHAN_LK_LEDs = 0 -- light the LEDs in static mode
 local CHAN_LK_LEDs2 = 15 -- light the white LEDs in static mode
+local CHAN_LK_LEDs_pulse = 2 -- pulsing mode
 local CHAN_LK = 0    -- in DAW mode the LK sends events to this chan
 local CHAN_LK2 = 15  -- but also to this one
 local CHAN_NTS = 1 -- NTS channel
@@ -330,6 +331,10 @@ function LED2(where, level)
     cc(CHAN_LK_LEDs2, LED_map[where], level)
 end
 
+function LED3(where, level)
+    cc(CHAN_LK_LEDs_pulse, LED_map[where], level)
+end
+
 function update_LEDs_visual_BPM()
     if click_lit then
         LED("pad_08", BLUE)
@@ -402,11 +407,11 @@ end
 
 function update_LEDs_confirm()
     if confirm_what ~= nil then
-        LED2("play_up", 127)
-        LED2("play_down", 127)
+        LED3("play_up", GREEN)
+        LED3("play_down", RED)
     else
-        LED2("play_up", 0)
-        LED2("play_down", 0)
+        LED2("play_up", 40)
+        LED2("play_down", 40)
     end
 end
 
@@ -452,8 +457,9 @@ function update_LEDs()
         -- NTS patches
         update_LEDs_synth_patch()
     else
-        LED2("play_up", 64)
-        LED2("play_down", 64)
+        -- error !!!
+        LED3("play_up", ORANGE)
+        LED3("play_down", ORANGE)
     end
 end
 
