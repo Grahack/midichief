@@ -293,7 +293,6 @@ function page_up(value)
     elseif value == 127 then  -- on press
         LED2("play_up", 127)
     else
-        LED2("play_up", 0)
         print("Page was", page)
         page = page + 1  -- no need to check (not triggered on page 3)
         print("Now page is", page)
@@ -307,7 +306,6 @@ function page_down(value)
     elseif value == 127 then  -- on press
         LED2("play_down", 127)
     else
-        LED2("play_up", 0)
         print("Page was", page)
         page = page - 1  -- no need to check (not triggered on page 0)
         print("Now page is", page)
