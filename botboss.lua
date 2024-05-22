@@ -349,6 +349,10 @@ function update_LEDs_black()
     for _, pad in ipairs(pads) do
         LED("pad_"..pad, BLACK)
     end
+    LED2("play_up", BLACK)
+    LED2("play_down", BLACK)
+    LED2("play", BLACK)
+    LED2("rec", BLACK)
 end
 
 function update_LEDs_synth_patch()
