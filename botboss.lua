@@ -967,15 +967,15 @@ function confirm(value)
             save_patch(save_filename)
             save_pad = pad
             save_color = 1
+            update_LEDs()
         elseif confirm_what == "halt" then
             print("HALT")
+            update_LEDs_black()
             melody_down(CHAN_FLUID)
             melody_down(CHAN_NTS)
-            LED("pad_01", BLACK)
             os.execute("sudo halt")
         end
         confirm_what = nil
-        update_LEDs()
     end
 end
 
