@@ -293,10 +293,12 @@ function page_up(value)
         confirm(value)
     elseif value == 127 then  -- on press
         LED2("play_up", 127)
-    else
+    elseif page < 3 then
         print("Page was", page)
         page = page + 1  -- no need to check (not triggered on page 3)
         print("Now page is", page)
+        update_LEDs()
+    else
         update_LEDs()
     end
 end
@@ -306,10 +308,12 @@ function page_down(value)
         cancel(value)
     elseif value == 127 then  -- on press
         LED2("play_down", 127)
-    else
+    elseif page > 0 then
         print("Page was", page)
         page = page - 1  -- no need to check (not triggered on page 0)
         print("Now page is", page)
+        update_LEDs()
+    else
         update_LEDs()
     end
 end
@@ -317,7 +321,9 @@ end
 function play_up_0(value) page_up(value) end
 function play_up_1(value) page_up(value) end
 function play_up_2(value) page_up(value) end
+function play_up_3(value) page_up(value) end  -- needed for confirmation
 
+function play_down_0(value) page_down(value) end  -- needed for confirmation
 function play_down_1(value) page_down(value) end
 function play_down_2(value) page_down(value) end
 function play_down_3(value) page_down(value) end
