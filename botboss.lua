@@ -973,6 +973,7 @@ function confirm(value)
             save_patch(save_filename)
             save_pad = pad
             save_color = 1
+            confirm_what = nil
             update_LEDs()
         elseif confirm_what == "halt" then
             print("HALT")
@@ -980,8 +981,9 @@ function confirm(value)
             melody_down(CHAN_FLUID)
             melody_down(CHAN_NTS)
             os.execute("sudo halt")
+        else
+            confirm_what = nil
         end
-        confirm_what = nil
     end
 end
 
