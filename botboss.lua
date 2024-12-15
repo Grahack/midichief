@@ -1024,6 +1024,7 @@ end
 
 function save_patch(filename)
     local content = patch_to_MIDI_content(current_patch)
+    print("Attempting to save", filename)
     save_content(content, filename)
     print(filename, "saved!")
 end
